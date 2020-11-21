@@ -1,0 +1,6 @@
+{
+    "files.autoSave": "onFocusChange",
+    "python.linting.enabled": false,
+    "terminal.integrated.shell.windows": 
+    "C://WINDOWS//System32//cmd.exe",
+}
