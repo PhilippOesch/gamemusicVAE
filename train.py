@@ -296,50 +296,50 @@ save_config()
 train_loss = []
 ofs = 0
 
-for iter in range(NUM_EPOCHS):
-	if USE_EMBEDDING:
-		history = model.fit(x_train, y_train, batch_size=BATCH_SIZE, epochs=1)
-	else:
-		cur_ix = 0
-		for i in range(num_songs):
-			end_ix = cur_ix + y_lengths[i]
-			for j in range(MAX_LENGTH):
-				k = (j + ofs) % (end_ix - cur_ix)
-				y_train[i,j] = y_samples[cur_ix + k]
-			cur_ix = end_ix
-		assert(end_ix == num_samples)
-		ofs += 1
+# for iter in range(NUM_EPOCHS):
+# 	if USE_EMBEDDING:
+# 		history = model.fit(x_train, y_train, batch_size=BATCH_SIZE, epochs=1)
+# 	else:
+# 		cur_ix = 0
+# 		for i in range(num_songs):
+# 			end_ix = cur_ix + y_lengths[i]
+# 			for j in range(MAX_LENGTH):
+# 				k = (j + ofs) % (end_ix - cur_ix)
+# 				y_train[i,j] = y_samples[cur_ix + k]
+# 			cur_ix = end_ix
+# 		assert(end_ix == num_samples)
+# 		ofs += 1
 
-		history = model.fit(y_train, y_train, batch_size=BATCH_SIZE, epochs=1)
+# 		history = model.fit(y_train, y_train, batch_size=BATCH_SIZE, epochs=1)
 
-	loss = history.history["loss"][-1]
-	train_loss.append(loss)
-	print ("Train Loss: " + str(train_loss[-1]))
+# 	loss = history.history["loss"][-1]
+# 	train_loss.append(loss)
+# 	print ("Train Loss: " + str(train_loss[-1]))
 	
-	# if WRITE_HISTORY:
-	# 	#plotScores(train_loss, 'History/Scores.png', True)
-	# else:
-	# 	#plotScores(train_loss, 'Scores.png', True)
+# 	if WRITE_HISTORY:
+# 		plotScores(train_loss, 'History/Scores.png', True)
+# 	else:
+# 		plotScores(train_loss, 'Scores.png', True)
 	
-	i = iter + 1
-	if i in [1, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200, 250, 300, 350, 400, 450] or (i % 100 == 0):
-		write_dir = ''
-		if WRITE_HISTORY:
-			#Create folder to save models into
-			write_dir = 'History/e' + str(i)
-			if not os.path.exists(write_dir):
-				os.makedirs(write_dir)
-			write_dir += '/'
-			model.save('History/model.h5')
-		else:
-			model.save('model.h5')
-		print ("Saved")
+# 	i = iter + 1
+# 	if i in [1, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200, 250, 300, 350, 400, 450] or (i % 100 == 0):
+# 		write_dir = ''
+# 		if WRITE_HISTORY:
+# 			#Create folder to save models into
+# 			write_dir = 'History/e' + str(i)
+# 			if not os.path.exists(write_dir):
+# 				os.makedirs(write_dir)
+# 			write_dir += '/'
+# 			model.save('History/model.h5')
+# 		else:
+# 			model.save('model.h5')
+# 		print ("Saved")
 
-		if USE_EMBEDDING:
-			y_song = model.predict(x_test_song, batch_size=BATCH_SIZE)[0]
-		else:
-			y_song = model.predict(y_test_song, batch_size=BATCH_SIZE)[0]
-		#util.samples_to_pics(write_dir + 'test', y_song)
-		midi.samples_to_midi(y_song, write_dir + 'test.mid', 16)
+# 		if USE_EMBEDDING:
+# 			y_song = model.predict(x_test_song, batch_size=BATCH_SIZE)[0]
+# 		else:
+# 			y_song = model.predict(y_test_song, batch_size=BATCH_SIZE)[0]
+# 		util.samples_to_pics(write_dir + 'test', y_song)
+# 		midi.samples_to_midi(y_song, write_dir + 'test.mid', 16)
 
-		make_rand_songs_normalized(write_dir, rand_vecs)
+# 		make_rand_songs_normalized(write_dir, rand_vecs)
