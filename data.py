@@ -2,22 +2,23 @@ import numpy as np
 
 class Data:
     def __init__(self, use_embedding= False, max_length= 16):
-        num_offsets = 16 if use_embedding else 1
+        self.num_offsets = 16 if use_embedding else 1
 
         self.y_samples = np.load('samples.npy')
         self.y_lengths = np.load('lengths.npy')
         self.num_samples = self.y_samples.shape[0]
         self.num_songs = self.y_lengths.shape[0]
+        assert(np.sum(self.y_lengths) == self.num_samples)
 
-        self.x_shape = (self.num_songs * num_offsets, 1)
-        self.y_shape = (self.num_songs * num_offsets, max_length) + self.y_samples.shape[1:]
+        self.x_shape = (self.num_songs * self.num_offsets, 1)
+        self.y_shape = (self.num_songs * self.num_offsets, max_length) + self.y_samples.shape[1:]
         self.x_orig = np.expand_dims(np.arange(self.x_shape[0]), axis=-1)
         self.y_orig = np.zeros(self.y_shape, dtype=self.y_samples.dtype)
         self.cur_ix = 0
 
         for i in range(self.num_songs):
-            for ofs in range(num_offsets):
-                ix= int(i* num_offsets + ofs)
+            for ofs in range(self.num_offsets):
+                ix= i* self.num_offsets + ofs
                 end_ix = self.cur_ix + self.y_lengths[i]
                 for j in range(max_length):
                     k= (j + ofs)% (end_ix - self.cur_ix)

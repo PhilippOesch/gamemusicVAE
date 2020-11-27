@@ -284,7 +284,7 @@ def make_rand_songs_normalized(write_dir, rand_vecs):
 
 if PLAY_ONLY:
 	print ("Generating Songs...")
-	make_rand_songs_normalized('', rand_vecs)
+	make_rand_songs_normalized('/TestSamples/', rand_vecs)
 	for i in xrange(20):
 		x_test_song = x_train[i:i+1]
 		y_song = model.predict(x_test_song, batch_size=BATCH_SIZE)[0]
@@ -321,25 +321,25 @@ ofs = 0
 # 	else:
 # 		plotScores(train_loss, 'Scores.png', True)
 	
-# 	i = iter + 1
-# 	if i in [1, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200, 250, 300, 350, 400, 450] or (i % 100 == 0):
-# 		write_dir = ''
-# 		if WRITE_HISTORY:
-# 			#Create folder to save models into
-# 			write_dir = 'History/e' + str(i)
-# 			if not os.path.exists(write_dir):
-# 				os.makedirs(write_dir)
-# 			write_dir += '/'
-# 			model.save('History/model.h5')
-# 		else:
-# 			model.save('model.h5')
-# 		print ("Saved")
+	# i = iter + 1
+	# if i in [1, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200, 250, 300, 350, 400, 450] or (i % 100 == 0):
+	# 	write_dir = ''
+	# 	if WRITE_HISTORY:
+	# 		#Create folder to save models into
+	# 		write_dir = 'History/e' + str(i)
+	# 		if not os.path.exists(write_dir):
+	# 			os.makedirs(write_dir)
+	# 		write_dir += '/'
+	# 		model.save('History/model.h5')
+	# 	else:
+	# 		model.save('model.h5')
+	# 	print ("Saved")
 
-# 		if USE_EMBEDDING:
-# 			y_song = model.predict(x_test_song, batch_size=BATCH_SIZE)[0]
-# 		else:
-# 			y_song = model.predict(y_test_song, batch_size=BATCH_SIZE)[0]
-# 		util.samples_to_pics(write_dir + 'test', y_song)
-# 		midi.samples_to_midi(y_song, write_dir + 'test.mid', 16)
+	# 	if USE_EMBEDDING:
+	# 		y_song = model.predict(x_test_song, batch_size=BATCH_SIZE)[0]
+	# 	else:
+	# 		y_song = model.predict(y_test_song, batch_size=BATCH_SIZE)[0]
+	# 	util.samples_to_pics(write_dir + 'test', y_song)
+	# 	midi.samples_to_midi(y_song, write_dir + 'test.mid', 16)
 
-# 		make_rand_songs_normalized(write_dir, rand_vecs)
+	# 	make_rand_songs_normalized(write_dir, rand_vecs)

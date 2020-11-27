@@ -25,9 +25,12 @@ for root, subdirs, files in os.walk(directory):
         if len(samples)< 8:
             continue
 
+        if samples == []:
+            continue
         samples, lens = util.generate_add_centered_transpose(samples)
         all_samples += samples
         all_lens += lens
+        print (len(all_lens))
 	
 assert(sum(all_lens) == len(all_samples))
 print ("Saving " + str(len(all_samples)) + " samples...")
