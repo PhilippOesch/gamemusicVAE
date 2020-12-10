@@ -1,21 +1,17 @@
 from keras.engine.topology import Layer
 from keras import regularizers
 from keras import backend as K
-from keras.utils import plot_model
-from keras.regularizers import l2
-from keras.preprocessing.image import ImageDataGenerator
-from keras.optimizers import Adam, RMSprop, SGD
-from keras.models import Model, Sequential, load_model
-from keras.losses import binary_crossentropy
+from keras.layers import *
 from keras.initializers import RandomNormal
-from keras.layers.recurrent import LSTM, SimpleRNN
-from keras.layers.normalization import BatchNormalization
-from keras.layers.noise import GaussianNoise
-from keras.layers.pooling import MaxPooling2D, AveragePooling2D
-from keras.layers.local import LocallyConnected2D
-from keras.layers.embeddings import Embedding
-from keras.layers.convolutional import Conv1D, Conv2D, Conv2DTranspose, UpSampling2D, ZeroPadding2D
-from keras.layers import Input, Dense, Activation, Dropout, Flatten, Reshape, Permute, RepeatVector, ActivityRegularization, TimeDistributed, Lambda, SpatialDropout1D
+from keras.losses import binary_crossentropy
+from keras.models import Model, Sequential, load_model
+from keras.optimizers import *
+from keras.preprocessing.image import ImageDataGenerator
+from keras.regularizers import l2
+from keras.utils import plot_model
+from keras import backend as K
+from keras import regularizers
+from keras.engine.topology import Layer
 import keras
 from data import *
 
@@ -30,8 +26,8 @@ import util
 import midi
 
 import tensorflow as tf
-gpus = tf.config.experimental.list_physical_devices('GPU')
-tf.config.experimental.set_memory_growth(gpus[0], True)
+# gpus = tf.config.experimental.list_physical_devices('GPU')
+# tf.config.experimental.set_memory_growth(gpus[0], True)
 
 print("Keras Version: " + keras.__version__)
 K.set_image_data_format('channels_first')
@@ -41,7 +37,7 @@ EPOCHS = 2000
 BATCH_SIZE = 200
 WRITE_HISTORY = True
 NUM_RAND_SONGS = 50
-PLAY_ONLY = True
+PLAY_ONLY = False
 
 if WRITE_HISTORY:
     # Create folder to save models into
@@ -188,8 +184,7 @@ save_config()
 train_loss = []
 ofs = 0
 
-func = K.function([model.get_layer('encoder').input, K.learning_phase()],
-                  [model.layers[-1].output])
+func = K.function([model.get_layer('encoder').input, K.learning_phase()], [model.layers[-1].output])
 enc = Model(inputs=model.input, outputs=model.get_layer('pre_encoder').output)
 
 rand_vecs = np.random.normal(0.0, 1.0, (NUM_RAND_SONGS, params["param_size"]))
