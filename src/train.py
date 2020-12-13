@@ -11,24 +11,7 @@ from tensorflow.keras.models import Model, Sequential, load_model
 import os
 import util
 
-params = {
-    "optimizer": Adam,
-    "use_embedding": False,
-    "param_size": 120,
-    "activation_str": 'relu',
-    "max_length": 16,
-    "bn_m": 0.9,
-    "do_rate": 0.1,
-    "lr": 0.001,
-    "vae_b1": 0.02,
-    "vae_b2": 0.1,
-    "epochs": 2000,
-    "batch_size": 200,
-    "write_history": True,
-    "num_rand_songs": 10,
-    "play_only": False
-}
-
+import params
 
 # Create folder to save models into
 if not os.path.exists('../History'):
@@ -40,7 +23,14 @@ if not os.path.exists('../History/BattleTheme'):
 if not os.path.exists('../model'):
     os.makedirs('../model')
 
-musicVAE= MusicVAE(**params)
+if not os.path.exists('../samples'):
+    os.makedirs('../samples')
+
+if not os.path.exists('../Testsamples'):
+    os.makedirs('../Testsamples')
+
+musicVAE= MusicVAE(**VAEparams)
+
 musicVAE.build_full_model()
 model= musicVAE.model
 
@@ -58,7 +48,7 @@ midi.samples_to_midi(y_test_song[0], '../model/gt.mid', 16)
 encoder = musicVAE.encoder
 pre_encoder = musicVAE.pre_encoder
 
-rand_vecs = np.random.normal(0.0, 1.0, (params["num_rand_songs"], params["param_size"]))
+rand_vecs = np.random.normal(0.0, 1.0, (VAEparams["num_rand_songs"], VAEparams["param_size"]))
 np.save('../model/rand.npy', rand_vecs)
 
 def to_song(encoded_output):
@@ -82,7 +72,7 @@ def make_rand_songs(write_dir, rand_vecs):
 
 
 def make_rand_songs_normalized(write_dir, rand_vecs):
-    if params["use_embedding"]:
+    if VAEparams["use_embedding"]:
         x_enc = np.squeeze(pre_encoder.predict(musicVAE.data.x_orig))
     else:
         x_enc = np.squeeze(pre_encoder.predict(musicVAE.data.y_orig))
@@ -152,7 +142,7 @@ class CustomCallback(tf.keras.callbacks.Callback):
         cur_ix = 0
         for i in range(musicVAE.data.num_songs):
             end_ix = cur_ix + musicVAE.data.y_lengths[i]
-            for j in range(params["max_length"]):
+            for j in range(VAEparams["max_length"]):
                 k = (j + self.ofs) % (end_ix - cur_ix)
                 musicVAE.y_train[i, j] = musicVAE.data.y_samples[cur_ix + k]
             cur_ix = end_ix
@@ -160,14 +150,14 @@ class CustomCallback(tf.keras.callbacks.Callback):
         self.ofs += 1
 
     def on_epoch_end(self, epoch, logs={}):
-        if params["write_history"]:
+        if VAEparams["write_history"]:
             plotScores(train_loss, '../History/BattleTheme/Scores.png', True)
         else:
             plotScores(train_loss, '../model/Scores.png', True)
 
         if epoch in [1, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200, 250, 300, 350, 400, 450] or (epoch % 100 == 0):
             write_dir = ''
-            if params["write_history"]:
+            if VAEparams["write_history"]:
                 write_dir = '../History/BattleTheme/e' + str(epoch)
                 if not os.path.exists(write_dir):
                     os.makedirs(write_dir)
@@ -182,7 +172,7 @@ class CustomCallback(tf.keras.callbacks.Callback):
                 model.save('../model/model.h5')
             print("Saved")
 
-            y_song = model.predict(y_test_song, batch_size=params["batch_size"])[0]
+            y_song = model.predict(y_test_song, batch_size=VAEparams["batch_size"])[0]
             util.samples_to_pics(write_dir + 'test', y_song)
             midi.samples_to_midi(y_song, write_dir + 'test.mid', 16)
 
@@ -190,12 +180,17 @@ class CustomCallback(tf.keras.callbacks.Callback):
 
 callback = CustomCallback()
 
+# if VAEparams["play_only"]:
+#     # encoder= load_model('../model/encoder_model.h5')
+#     # # pre_encoder= load_model('../model/pre_encoder_model.h5', custom_objects={'VAE_B1': VAEparams["vae_b1"], 'vae_loss': vae_loss})
+#     # make_rand_songs_normalized('/Testsamples', rand_vecs)
+# else:
 print("train")
 model.fit(
     x=musicVAE.y_train,
     y=musicVAE.y_train,
-    epochs=params["epochs"],
-    batch_size=params["batch_size"],
+    epochs=VAEparams["epochs"],
+    batch_size=VAEparams["batch_size"],
     callbacks=[callback],
 )
 

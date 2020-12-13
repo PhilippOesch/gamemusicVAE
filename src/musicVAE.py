@@ -10,6 +10,9 @@ from tensorflow.keras.optimizers import *
 from data import *
 from tensorflow.keras.backend import learning_phase
 
+from params import *
+
+vae_b1= VAEparams["vae_b1"]
 
 class MusicVAE():
     def __init__(self, optimizer, use_embedding, param_size, activation_str, max_length, bn_m, do_rate, lr, vae_b1, vae_b2, epochs, batch_size, write_history, num_rand_songs, play_only):
@@ -120,4 +123,8 @@ class MusicVAE():
         return self.z_mean + K.exp(self.z_log_sigma_sq * 0.5) * epsilon
 
 
+def vae_sampling(args):
+    z_mean, z_log_sigma_sq = args
+    epsilon = K.random_normal(shape=K.shape(z_mean), mean=0.0, stddev=vae_b1)
+    return z_mean + K.exp(z_log_sigma_sq * 0.5) * epsilon
     

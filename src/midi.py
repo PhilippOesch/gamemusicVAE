@@ -213,6 +213,7 @@ def samples_to_midi(samples, fname, ticks_per_sample, thresh=0.5):
                     track.append(Message('note_off', note=int(
                         note), velocity=127, time=int(delta_time)))
                     last_time = abs_time
+                
     mid.save(fname)
 
 
