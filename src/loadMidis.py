@@ -9,19 +9,22 @@ all_samples = []
 all_lens = []
 print ("Loading Songs...")
 
+if not os.path.exists('../model'):
+    os.makedirs('../model')
+
 for root, subdirs, files in os.walk(directory):
     for file in files:
         path = root+ "\\" + file
         if not (path.endswith('.mid') or path.endswith('.midi')):
             continue
 
-        # try:
-        #     samples = midi.midi_to_samples(path)
+        try:
+            samples = midi.midi_to_samples(path)
 
-        samples = midi.midi_to_samples(path)
-        # except:
-        #     print ("ERROR", path)
-        #     continue
+        # samples = midi.midi_to_samples(path)
+        except:
+            print ("ERROR", path)
+            continue
 
         if len(samples)< 8:
             continue
@@ -31,7 +34,7 @@ for root, subdirs, files in os.walk(directory):
         # samples, lens = util.generate_add_centered_transpose(samples)
         samples, lens= util.generate_all_transpose(samples, radius=6)
         all_samples += samples
-        all_lens += lens
+        all_lens += lens 
         print (len(all_lens))
 	
 assert(sum(all_lens) == len(all_samples))
