@@ -12,13 +12,14 @@ import os
 import util
 
 import params
+import musicVAE
 
 # Create folder to save models into
 if not os.path.exists('../History'):
     os.makedirs('../History')
 
-if not os.path.exists('../History/BattleTheme'):
-    os.makedirs('../History/BattleTheme')
+if not os.path.exists(VAEparams["history_dir"]):
+    os.makedirs(VAEparams["history_dir"])
 
 if not os.path.exists('../model'):
     os.makedirs('../model')
@@ -29,10 +30,17 @@ if not os.path.exists('../samples'):
 if not os.path.exists('../Testsamples'):
     os.makedirs('../Testsamples')
 
-musicVAE= MusicVAE(**VAEparams)
+z_log_sigma_sq = 0.0
+z_mean = 0.0
 
-musicVAE.build_full_model()
-model= musicVAE.model
+if VAEparams["play_only"]:
+    # encoder= load_model('../model/encoder_model')
+    # pre_encoder= load_model('../model/pre_encoder_model')
+    model, encoder, pre_encoder= musicVAE.build_full_model(**VAEparams)
+    model.load_weights('../model/model_weights.h5')
+    # pre_encoder= load_model('../model/pre_encoder_model.h5', custom_objects={'VAE_B1': musicVAE.vae_b1, 'vae_loss': musicVAE.vae_loss})
+else:
+    model, encoder, pre_encoder= musicVAE.build_full_model(**VAEparams)
 
 # save_config()
 train_loss = []
@@ -45,15 +53,11 @@ midi.samples_to_midi(y_test_song[0], '../model/gt.mid', 16)
 
 # train
 
-encoder = musicVAE.encoder
-pre_encoder = musicVAE.pre_encoder
-
 rand_vecs = np.random.normal(0.0, 1.0, (VAEparams["num_rand_songs"], VAEparams["param_size"]))
 np.save('../model/rand.npy', rand_vecs)
 
-def to_song(encoded_output):
-    return np.squeeze(decoder([np.round(encoded_output), 0])[0])
-
+# def to_song(encoded_output):
+#     return np.squeeze(decoder([np.round(encoded_output), 0])[0])
 
 def reg_mean_std(x):
     s = K.log(K.sum(x * x))
@@ -151,20 +155,23 @@ class CustomCallback(tf.keras.callbacks.Callback):
 
     def on_epoch_end(self, epoch, logs={}):
         if VAEparams["write_history"]:
-            plotScores(train_loss, '../History/BattleTheme/Scores.png', True)
+            plotScores(train_loss, VAEparams["history_dir"]+'Scores.png', True)
         else:
             plotScores(train_loss, '../model/Scores.png', True)
 
         if epoch in [1, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200, 250, 300, 350, 400, 450] or (epoch % 100 == 0):
             write_dir = ''
             if VAEparams["write_history"]:
-                write_dir = '../History/BattleTheme/e' + str(epoch)
+                write_dir = VAEparams["history_dir"]+ 'e' + str(epoch)
                 if not os.path.exists(write_dir):
                     os.makedirs(write_dir)
                 write_dir += '/'
-                model.save('../History/BattleTheme/model.h5')
-                encoder.save('../History/BattleTheme/encoder_model.h5')
-                pre_encoder.save('../History/BattleTheme/pre_encoder_model.h5')
+                # model.save('../History/BattleTheme/model')
+                # encoder.save('../History/BattleTheme/encoder_model')
+                # pre_encoder.save('../History/BattleTheme/pre_encoder_model')
+                model.save_weights(VAEparams["history_dir"]+ 'model_weights.h5')
+                encoder.save_weights(VAEparams["history_dir"]+ 'encoder_weights.h5')
+                pre_encoder.save_weights(VAEparams["history_dir"]+ 'pre_encoder_weights.h5')
 
                 model.summary()
 
@@ -180,21 +187,21 @@ class CustomCallback(tf.keras.callbacks.Callback):
 
 callback = CustomCallback()
 
-# if VAEparams["play_only"]:
-#     # encoder= load_model('../model/encoder_model.h5')
-#     # # pre_encoder= load_model('../model/pre_encoder_model.h5', custom_objects={'VAE_B1': VAEparams["vae_b1"], 'vae_loss': vae_loss})
-#     # make_rand_songs_normalized('/Testsamples', rand_vecs)
-# else:
-print("train")
-model.fit(
-    x=musicVAE.y_train,
-    y=musicVAE.y_train,
-    epochs=VAEparams["epochs"],
-    batch_size=VAEparams["batch_size"],
-    callbacks=[callback],
-)
+if VAEparams["play_only"]:
+    # encoder= load_model('../model/encoder_model.h5')
+    # # pre_encoder= load_model('../model/pre_encoder_model.h5', custom_objects={'VAE_B1': VAEparams["vae_b1"], 'vae_loss': vae_loss})
+    make_rand_songs_normalized('../Testsamples/', rand_vecs)
+else:
+    print("train")
+    # model.fit(
+    #     x=musicVAE.y_train,
+    #     y=musicVAE.y_train,
+    #     epochs=VAEparams["epochs"],
+    #     batch_size=VAEparams["batch_size"],
+    #     callbacks=[callback],
+    # )
 
 for i in range(10):
     print("test")
-    util.samples_to_pics('samples/' + 'test' + str(i) , musicVAE.y_train[i])
-    midi.samples_to_midi(musicVAE.y_train[i], 'samples/testtest' + str(i) +'.mid', 96)
+    util.samples_to_pics('../samples/' + 'test' + str(i) , musicVAE.y_train[i])
+    midi.samples_to_midi(musicVAE.y_train[i], '../samples/testtest' + str(i) +'.mid', 96)

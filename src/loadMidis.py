@@ -15,19 +15,21 @@ for root, subdirs, files in os.walk(directory):
         if not (path.endswith('.mid') or path.endswith('.midi')):
             continue
 
-        try:
-            samples = midi.midi_to_samples(path)
+        # try:
+        #     samples = midi.midi_to_samples(path)
 
-        except:
-            print ("ERROR", path)
-            continue
+        samples = midi.midi_to_samples(path)
+        # except:
+        #     print ("ERROR", path)
+        #     continue
 
         if len(samples)< 8:
             continue
 
         if samples == []:
             continue
-        samples, lens = util.generate_add_centered_transpose(samples)
+        # samples, lens = util.generate_add_centered_transpose(samples)
+        samples, lens= util.generate_all_transpose(samples, radius=6)
         all_samples += samples
         all_lens += lens
         print (len(all_lens))

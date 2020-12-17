@@ -3,4 +3,8 @@
     "python.linting.enabled": false,
     "terminal.integrated.shell.windows": 
     "C://WINDOWS//System32//cmd.exe",
+    "python.languageServer": "Pylance",
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.python"
+    },
 }

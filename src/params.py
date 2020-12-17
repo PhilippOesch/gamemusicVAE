@@ -14,6 +14,7 @@ VAEparams = {
     "epochs": 2000,
     "batch_size": 200,
     "write_history": True,
-    "num_rand_songs": 20,
-    "play_only": False
+    "num_rand_songs": 10,
+    "play_only": False,
+    "history_dir": '../History/BattleTheme_with_transpositions/'
 }
