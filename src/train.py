@@ -6,8 +6,11 @@ import pydot
 import scipy
 from matplotlib import pyplot as plt
 from tensorflow.keras import backend as K
+from tensorflow.keras.callbacks import TensorBoard
 from tensorflow.keras.backend import learning_phase
 from tensorflow.keras.models import Model, Sequential, load_model
+from tensorflow.keras.wrappers.scikit_learn import KerasClassifier
+from sklearn.model_selection import GridSearchCV
 import os
 import util
 
@@ -36,11 +39,11 @@ z_mean = 0.0
 if VAEparams["play_only"]:
     # encoder= load_model('../model/encoder_model')
     # pre_encoder= load_model('../model/pre_encoder_model')
-    model, encoder, pre_encoder= musicVAE.build_full_model(**VAEparams)
+    model, encoder, pre_encoder = musicVAE.build_full_model(**VAEparams)
     model.load_weights('../model/model_weights.h5')
     # pre_encoder= load_model('../model/pre_encoder_model.h5', custom_objects={'VAE_B1': musicVAE.vae_b1, 'vae_loss': musicVAE.vae_loss})
 else:
-    model, encoder, pre_encoder= musicVAE.build_full_model(**VAEparams)
+    model, encoder, pre_encoder = musicVAE.build_full_model(**VAEparams)
 
 # save_config()
 train_loss = []
@@ -53,11 +56,13 @@ midi.samples_to_midi(y_test_song[0], '../model/gt.mid', 16)
 
 # train
 
-rand_vecs = np.random.normal(0.0, 1.0, (VAEparams["num_rand_songs"], VAEparams["param_size"]))
+rand_vecs = np.random.normal(
+    0.0, 1.0, (VAEparams["num_rand_songs"], VAEparams["param_size"]))
 np.save('../model/rand.npy', rand_vecs)
 
 # def to_song(encoded_output):
 #     return np.squeeze(decoder([np.round(encoded_output), 0])[0])
+
 
 def reg_mean_std(x):
     s = K.log(K.sum(x * x))
@@ -68,11 +73,12 @@ def make_rand_songs(write_dir, rand_vecs):
     for i in range(rand_vecs.shape[0]):
         x_rand = rand_vecs[i:i+1]
         # print(x_rand.shape)
-        y_song= encoder.predict(x_rand)
+        y_song = encoder.predict(x_rand)
         # y_song = func([x_rand, 0])[0]
         print(y_song.shape)
         # y_song = func([x_rand, 0])[0]
-        midi.samples_to_midi(y_song[0], write_dir +'rand' + str(i) + '.mid', 16, 0.25)
+        midi.samples_to_midi(y_song[0], write_dir +
+                             'rand' + str(i) + '.mid', 16, 0.5)
 
 
 def make_rand_songs_normalized(write_dir, rand_vecs):
@@ -86,6 +92,7 @@ def make_rand_songs_normalized(write_dir, rand_vecs):
     x_cov = np.cov((x_enc - x_mean).T)
     print(x_cov.shape)
     # u, s, v = np.linalg.svd(x_cov)
+    x_cov = np.nan_to_num(x_cov)
     u, s, v = scipy.linalg.svd(x_cov)
     e = np.sqrt(s)
 
@@ -137,6 +144,7 @@ def plotScores(scores, fname, on_top=True):
     plt.draw()
     plt.savefig(fname)
 
+
 class CustomCallback(tf.keras.callbacks.Callback):
     def __init__(self):
         self.ofs = 0
@@ -162,16 +170,19 @@ class CustomCallback(tf.keras.callbacks.Callback):
         if epoch in [1, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200, 250, 300, 350, 400, 450] or (epoch % 100 == 0):
             write_dir = ''
             if VAEparams["write_history"]:
-                write_dir = VAEparams["history_dir"]+ 'e' + str(epoch)
+                write_dir = VAEparams["history_dir"] + 'e' + str(epoch)
                 if not os.path.exists(write_dir):
                     os.makedirs(write_dir)
                 write_dir += '/'
                 # model.save('../History/BattleTheme/model')
                 # encoder.save('../History/BattleTheme/encoder_model')
                 # pre_encoder.save('../History/BattleTheme/pre_encoder_model')
-                model.save_weights(VAEparams["history_dir"]+ 'model_weights.h5')
-                encoder.save_weights(VAEparams["history_dir"]+ 'encoder_weights.h5')
-                pre_encoder.save_weights(VAEparams["history_dir"]+ 'pre_encoder_weights.h5')
+                model.save_weights(
+                    VAEparams["history_dir"] + 'model_weights.h5')
+                encoder.save_weights(
+                    VAEparams["history_dir"] + 'encoder_weights.h5')
+                pre_encoder.save_weights(
+                    VAEparams["history_dir"] + 'pre_encoder_weights.h5')
 
                 model.summary()
 
@@ -179,11 +190,13 @@ class CustomCallback(tf.keras.callbacks.Callback):
                 model.save('../model/model.h5')
             print("Saved")
 
-            y_song = model.predict(y_test_song, batch_size=VAEparams["batch_size"])[0]
+            y_song = model.predict(
+                y_test_song, batch_size=VAEparams["batch_size"])[0]
             util.samples_to_pics(write_dir + 'test', y_song)
             midi.samples_to_midi(y_song, write_dir + 'test.mid', 16)
 
             make_rand_songs_normalized(write_dir, rand_vecs)
+
 
 callback = CustomCallback()
 
@@ -193,15 +206,38 @@ if VAEparams["play_only"]:
     make_rand_songs_normalized('../Testsamples/', rand_vecs)
 else:
     print("train")
-    # model.fit(
-    #     x=musicVAE.y_train,
-    #     y=musicVAE.y_train,
-    #     epochs=VAEparams["epochs"],
-    #     batch_size=VAEparams["batch_size"],
-    #     callbacks=[callback],
-    # )
+    model.fit(
+        x=musicVAE.y_train,
+        y=musicVAE.y_train,
+        epochs=VAEparams["epochs"],
+        batch_size=VAEparams["batch_size"],
+        callbacks=[callback],
+    )
 
-for i in range(10):
-    print("test")
-    util.samples_to_pics('../samples/' + 'test' + str(i) , musicVAE.y_train[i])
-    midi.samples_to_midi(musicVAE.y_train[i], '../samples/testtest' + str(i) +'.mid', 96)
+# for i in range(10):
+#     print("test")
+#     util.samples_to_pics('../samples/' + 'test' + str(i) , musicVAE.y_train[i])
+#     midi.samples_to_midi(musicVAE.y_train[i], '../samples/testtest' + str(i) +'.mid', 96)
+
+# model_log_dir = os.path.join(VAEparams["log_dir"], "model6")
+
+# tb_callback = TensorBoard(
+#     log_dir=model_log_dir,
+#     histogram_freq=1,
+#     write_graph=True
+# )
+
+# model.fit(
+#     x=musicVAE.y_train,
+#     y=musicVAE.y_train,
+#     epochs=VAEparams["epochs"],
+#     batch_size=VAEparams["batch_size"],
+#     callbacks=[tb_callback],
+# )
+
+# scores = model.evaluate(
+#     x=musicVAE.y_train,
+#     y=musicVAE.y_train,
+#     verbose=0
+# )
+# print(f"Scores before saving: {scores}")

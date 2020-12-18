@@ -1,0 +1,14 @@
+
+Normal:
+Epochs: 50
+
+1: ParamSize: 120, lr= 0.001; Score: 0.10607000440359116
+2: ParamSize: 120, lr= 0.0007; Score: 0.10167737305164337
+3: ParamSize: 120, lr= 0.0005; Score: 0.10309936106204987
+4: ParamSize: 140, lr= 0.0007; Score: 0.10118985176086426
+5: ParamSize: 160, lr= 0.0007; Score: 0.10093971341848373
+6: ParamSize: 160, lr= 0.001; Score: 0.10286149382591248
+
+Model: Model 4
+
+Stakato: ParamSize: 120, lr= 0.001

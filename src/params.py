@@ -16,5 +16,6 @@ VAEparams = {
     "write_history": True,
     "num_rand_songs": 10,
     "play_only": False,
-    "history_dir": '../History/BattleTheme_with_transpositions/'
+    "history_dir": '../History/overworld_theme_stakkato/',
+    "log_dir": '../tensorboard'
 }
