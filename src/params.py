@@ -12,10 +12,10 @@ VAEparams = {
     "vae_b1": 0.02,
     "vae_b2": 0.1,
     "epochs": 2000,
-    "batch_size": 200,
+    "batch_size": 350,
     "write_history": True,
     "num_rand_songs": 10,
     "play_only": False,
-    "history_dir": '../History/overworld_theme_stakkato/',
+    "history_dir": '../History/overworld_theme_transposed_stakkato/',
     "log_dir": '../tensorboard'
 }

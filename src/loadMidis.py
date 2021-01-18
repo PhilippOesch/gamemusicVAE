@@ -31,8 +31,8 @@ for root, subdirs, files in os.walk(directory):
 
         if samples == []:
             continue
-        samples, lens = util.generate_add_centered_transpose(samples)
-        # samples, lens= util.generate_all_transpose(samples, radius=6)
+        # samples, lens = util.generate_add_centered_transpose(samples)
+        samples, lens= util.generate_all_transpose(samples, radius=6)
         all_samples += samples
         all_lens += lens 
         print (len(all_lens))

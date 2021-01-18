@@ -40,7 +40,11 @@ if VAEparams["play_only"]:
     # encoder= load_model('../model/encoder_model')
     # pre_encoder= load_model('../model/pre_encoder_model')
     model, encoder, pre_encoder = musicVAE.build_full_model(**VAEparams)
-    model.load_weights('../model/model_weights.h5')
+
+    if VAEparams["write_history"]:
+        model.load_weights(VAEparams["history_dir"]+'model_weights.h5')
+    else:
+        model.load_weights('../model/model_weights.h5')
     # pre_encoder= load_model('../model/pre_encoder_model.h5', custom_objects={'VAE_B1': musicVAE.vae_b1, 'vae_loss': musicVAE.vae_loss})
 else:
     model, encoder, pre_encoder = musicVAE.build_full_model(**VAEparams)
@@ -78,7 +82,7 @@ def make_rand_songs(write_dir, rand_vecs):
         print(y_song.shape)
         # y_song = func([x_rand, 0])[0]
         midi.samples_to_midi(y_song[0], write_dir +
-                             'rand' + str(i) + '.mid', 16, 0.5)
+                             'rand' + str(i) + '.mid', 16, 0.25)
 
 
 def make_rand_songs_normalized(write_dir, rand_vecs):
@@ -203,7 +207,12 @@ callback = CustomCallback()
 if VAEparams["play_only"]:
     # encoder= load_model('../model/encoder_model.h5')
     # # pre_encoder= load_model('../model/pre_encoder_model.h5', custom_objects={'VAE_B1': VAEparams["vae_b1"], 'vae_loss': vae_loss})
-    make_rand_songs_normalized('../Testsamples/', rand_vecs)
+    write_dir= '../Testsamples/overworld_theme_stakkato/';
+    if not os.path.exists(write_dir):
+        os.makedirs(write_dir)
+
+
+    make_rand_songs_normalized(write_dir + '/', rand_vecs)
 else:
     print("train")
     model.fit(
