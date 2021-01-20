@@ -8,6 +8,10 @@ import musicVAE
 import metrics
 
 samples= musicVAE.y_train[50]
+
+qn, qn_notes, notes= metrics.get_qn(samples= samples)
+
+print("Notes: ", notes, ", QN_Notes: ", qn_notes, ", QN Value: ", qn)
 hcdf_results= metrics.hcdf(samples= samples)
 
 #plot hcdf_results

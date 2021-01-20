@@ -28,6 +28,37 @@ warnings.filterwarnings("ignore",category =RuntimeWarning)
 #             t_c_samples[z, y] = zeta_y
 
 # Harmonic change detection function
+
+def get_qn(samples, thresh= 0.05):
+    note_counter= 0;
+    qualified_note_counter= 0;
+
+    adjusted_samples= np.reshape(samples, (samples.shape[0]* samples.shape[1], samples.shape[2]))
+
+    length_vector= np.zeros((num_notes), dtype= np.uint8)
+    for i in range(adjusted_samples.shape[0]):
+        for z in range(adjusted_samples.shape[1]):
+            if i== adjusted_samples.shape[0]-1:
+                if adjusted_samples[i, z]> thresh:
+                    length_vector[z]+= 1
+                if length_vector[z]>= 1:
+                    note_counter+=1
+                if length_vector[z]>=3:
+                    qualified_note_counter+= 1
+
+            if adjusted_samples[i, z]> thresh:
+                length_vector[z]+= 1
+            else:
+                if length_vector[z]>=1:
+                    note_counter+= 1
+                if length_vector[z]>=3:
+                    qualified_note_counter+= 1
+                length_vector[z]= 0
+
+    ratio= qualified_note_counter/ note_counter
+    return ratio, qualified_note_counter, note_counter
+
+
 def hcdf(samples, ignore_treshhold= True, thresh=0.5):
 #     # 12 Tone Equal Temperament
     eq_t_samples = samples_to_pitchclasses(samples)
