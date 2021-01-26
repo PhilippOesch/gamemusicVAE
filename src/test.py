@@ -8,11 +8,17 @@ import musicVAE
 import metrics
 
 samples= musicVAE.y_train[50]
+samples2= musicVAE.y_train[80]
 
 qn, qn_notes, notes= metrics.get_qn(samples= samples)
 
 print("Notes: ", notes, ", QN_Notes: ", qn_notes, ", QN Value: ", qn)
 hcdf_results= metrics.hcdf(samples= samples)
+
+td_total, td_per_frame= metrics.tonal_distance(samples, samples2)
+print("Tonal Distance:")
+print("Total= ", td_total)
+print("Per Frame= ", td_per_frame)
 
 #plot hcdf_results
 plt.plot(hcdf_results)

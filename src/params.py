@@ -1,21 +1,22 @@
-from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.optimizers import Adam, SGD
 
 VAEparams = {
     "optimizer": Adam,
     "use_embedding": False,
-    "param_size": 120,
+    "param_size": 200,
     "activation_str": 'relu',
     "max_length": 16,
     "bn_m": 0.9,
     "do_rate": 0.1,
-    "lr": 0.001,
+    "lr": 0.00075,
     "vae_b1": 0.02,
     "vae_b2": 0.1,
-    "epochs": 2000,
+    "epochs": 500,
     "batch_size": 350,
     "write_history": True,
-    "num_rand_songs": 10,
+    "num_rand_songs": 20,
     "play_only": False,
-    "history_dir": '../History/overworld_theme_transposed_stakkato/',
-    "log_dir": '../tensorboard'
+    "history_dir": '../History/overworld_themes_model7_transposed/',
+    "log_dir": '../tensorboard',
+    "continue_training": True
 }

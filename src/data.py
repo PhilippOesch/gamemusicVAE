@@ -13,7 +13,7 @@ class Data:
         self.x_shape = (self.num_songs * self.num_offsets, 1)
         self.y_shape = (self.num_songs * self.num_offsets, max_length) + self.y_samples.shape[1:]
         self.x_orig = np.expand_dims(np.arange(self.x_shape[0]), axis=-1)
-        self.y_orig = np.zeros(self.y_shape, dtype=self.y_samples.dtype)
+        self.y_orig = np.zeros(self.y_shape, dtype= np.float32)
         self.cur_ix = 0
 
         for i in range(self.num_songs):

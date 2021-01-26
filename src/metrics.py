@@ -203,3 +203,19 @@ def get_transformation_matrix(l):
          ))
 
     return t_matrix
+
+def tonal_distance(samples1, samples2, thresh= 0.5):
+    hcdf_samples1= hcdf(samples= samples1, thresh= thresh)
+    hcdf_samples2= hcdf(samples= samples2, thresh= thresh)
+
+    print(len(hcdf_samples1))
+    print(len(hcdf_samples2))
+
+    total_distance= 0;
+    for i in range(len(hcdf_samples1)):
+        total_distance += abs(hcdf_samples1[i]- hcdf_samples2[i])
+    
+    distance_per_frame= total_distance/ len(hcdf_samples1)
+
+    return total_distance, distance_per_frame
+

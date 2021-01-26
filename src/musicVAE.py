@@ -66,7 +66,7 @@ def get_encoder(param_size, bn_m, activation, do_rate, max_length):
     return model
 
 
-def get_pre_encoder(use_embedding, param_size, activation):
+def get_pre_encoder(use_embedding, param_size, activation, max_length):
     if use_embedding:
         x_in = Input(shape=x_shape[1:])
         x = Embedding(x_train.shape[0], param_size, input_length=1)(x_in)
@@ -94,8 +94,8 @@ def get_pre_encoder(use_embedding, param_size, activation):
 
         return model
 
-def build_full_model(optimizer, use_embedding, param_size, activation_str, max_length, bn_m, do_rate, lr, vae_b1, vae_b2, epochs, batch_size, write_history, num_rand_songs, play_only, history_dir, log_dir):
-    pre_encoder = get_pre_encoder(use_embedding= use_embedding, param_size= param_size, activation= activation_str)
+def build_full_model(optimizer, use_embedding, param_size, activation_str, max_length, bn_m, do_rate, lr, vae_b1, vae_b2, epochs, batch_size, write_history, num_rand_songs, play_only, history_dir, log_dir, continue_training):
+    pre_encoder = get_pre_encoder(use_embedding= use_embedding, param_size= param_size, activation= activation_str, max_length= max_length)
     encoder = get_encoder(param_size= param_size, bn_m= bn_m, activation=activation_str, do_rate=do_rate, max_length=max_length)
 
     x_in = pre_encoder.input

@@ -36,18 +36,15 @@ if not os.path.exists('../Testsamples'):
 z_log_sigma_sq = 0.0
 z_mean = 0.0
 
-if VAEparams["play_only"]:
+model, encoder, pre_encoder = musicVAE.build_full_model(**VAEparams)
+if VAEparams["play_only"] or VAEparams["continue_training"]:
     # encoder= load_model('../model/encoder_model')
     # pre_encoder= load_model('../model/pre_encoder_model')
-    model, encoder, pre_encoder = musicVAE.build_full_model(**VAEparams)
-
     if VAEparams["write_history"]:
         model.load_weights(VAEparams["history_dir"]+'model_weights.h5')
     else:
         model.load_weights('../model/model_weights.h5')
     # pre_encoder= load_model('../model/pre_encoder_model.h5', custom_objects={'VAE_B1': musicVAE.vae_b1, 'vae_loss': musicVAE.vae_loss})
-else:
-    model, encoder, pre_encoder = musicVAE.build_full_model(**VAEparams)
 
 # save_config()
 train_loss = []
@@ -73,7 +70,7 @@ def reg_mean_std(x):
     return s*s
 
 
-def make_rand_songs(write_dir, rand_vecs):
+def make_rand_songs(write_dir, rand_vecs, thresh= 0.25):
     for i in range(rand_vecs.shape[0]):
         x_rand = rand_vecs[i:i+1]
         # print(x_rand.shape)
@@ -82,10 +79,10 @@ def make_rand_songs(write_dir, rand_vecs):
         print(y_song.shape)
         # y_song = func([x_rand, 0])[0]
         midi.samples_to_midi(y_song[0], write_dir +
-                             'rand' + str(i) + '.mid', 16, 0.25)
+                             'rand' + str(i) + '.mid', 16, thresh)
 
 
-def make_rand_songs_normalized(write_dir, rand_vecs):
+def make_rand_songs_normalized(write_dir, rand_vecs, thresh= 0.25):
     if VAEparams["use_embedding"]:
         x_enc = np.squeeze(pre_encoder.predict(musicVAE.data.x_orig))
     else:
@@ -109,7 +106,7 @@ def make_rand_songs_normalized(write_dir, rand_vecs):
     np.save(write_dir + 'evecs.npy', v)
 
     x_vecs = x_mean + np.dot(rand_vecs * e, v)
-    make_rand_songs(write_dir, x_vecs)
+    make_rand_songs(write_dir, x_vecs, thresh)
 
     title = ''
     if '/' in write_dir:
@@ -199,7 +196,7 @@ class CustomCallback(tf.keras.callbacks.Callback):
             util.samples_to_pics(write_dir + 'test', y_song)
             midi.samples_to_midi(y_song, write_dir + 'test.mid', 16)
 
-            make_rand_songs_normalized(write_dir, rand_vecs)
+            make_rand_songs_normalized(write_dir, rand_vecs, 0.25)
 
 
 callback = CustomCallback()
@@ -207,12 +204,12 @@ callback = CustomCallback()
 if VAEparams["play_only"]:
     # encoder= load_model('../model/encoder_model.h5')
     # # pre_encoder= load_model('../model/pre_encoder_model.h5', custom_objects={'VAE_B1': VAEparams["vae_b1"], 'vae_loss': vae_loss})
-    write_dir= '../Testsamples/overworld_theme_stakkato/';
+    write_dir= '../Testsamples/overworld_theme/';
     if not os.path.exists(write_dir):
         os.makedirs(write_dir)
 
 
-    make_rand_songs_normalized(write_dir + '/', rand_vecs)
+    make_rand_songs_normalized(write_dir + '/', rand_vecs, 0.6)
 else:
     print("train")
     model.fit(

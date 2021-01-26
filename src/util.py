@@ -69,7 +69,7 @@ def sample_to_pattern(sample, ix, size):
 	pat_types = {}
 	pat_list = []
 	num_samples = len(sample) if type(sample) is list else sample.shape[0]
-	for i in xrange(size):
+	for i in range(size):
 		j = (ix + i) % num_samples
 		measure = sample[j].tobytes()
 		if measure not in pat_types:
