@@ -7,8 +7,11 @@ import params
 import musicVAE
 import metrics
 
-samples= musicVAE.y_train[50]
+samples= musicVAE.y_train[70]
 samples2= musicVAE.y_train[80]
+
+dp_rate= metrics.drum_pattern(samples)
+print("Rate of notes in a Drum-Pattern:", dp_rate)
 
 qn, qn_notes, notes= metrics.get_qn(samples= samples)
 

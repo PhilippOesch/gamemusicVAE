@@ -219,3 +219,17 @@ def tonal_distance(samples1, samples2, thresh= 0.5):
 
     return total_distance, distance_per_frame
 
+def drum_pattern(samples, thresh= 0.5):
+    print("Data_shape", samples.shape)
+    notes_counter= 0;
+    dp_notes_counter= 0;
+    for z in range(samples.shape[0]):
+        for y in range(samples.shape[1]):
+            for x in range(samples.shape[2]):
+                if y% 6== 0 and samples[z, y, x]> thresh:
+                    dp_notes_counter+= 1
+                    notes_counter+= 1
+                elif samples[z, y, x]> thresh:
+                    notes_counter+= 1
+
+    return dp_notes_counter/ notes_counter
