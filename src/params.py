@@ -3,7 +3,7 @@ from tensorflow.keras.optimizers import Adam, SGD
 VAEparams = {
     "optimizer": Adam,
     "use_embedding": False,
-    "param_size": 200,
+    "param_size": 120,
     "activation_str": 'relu',
     "max_length": 16,
     "bn_m": 0.9,
@@ -13,10 +13,11 @@ VAEparams = {
     "vae_b2": 0.1,
     "epochs": 500,
     "batch_size": 350,
-    "write_history": True,
-    "num_rand_songs": 20,
+    "write_history": False,
+    "num_rand_songs": 100,
     "play_only": False,
     "history_dir": '../History/overworld_themes_model7_transposed/',
     "log_dir": '../tensorboard',
-    "continue_training": True
+    "continue_training": False,
+    "createTestingValues": True
 }

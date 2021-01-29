@@ -37,7 +37,7 @@ z_log_sigma_sq = 0.0
 z_mean = 0.0
 
 model, encoder, pre_encoder = musicVAE.build_full_model(**VAEparams)
-if VAEparams["play_only"] or VAEparams["continue_training"]:
+if VAEparams["play_only"] or VAEparams["continue_training"] or VAEparams["createTestingValues"]:
     # encoder= load_model('../model/encoder_model')
     # pre_encoder= load_model('../model/pre_encoder_model')
     if VAEparams["write_history"]:
@@ -69,6 +69,19 @@ def reg_mean_std(x):
     s = K.log(K.sum(x * x))
     return s*s
 
+def make_rand_songs_and_get_result(write_dir, rand_vecs, thresh= 0.25):
+    songs= []
+    for i in range(rand_vecs.shape[0]):
+        x_rand = rand_vecs[i:i+1]
+        # print(x_rand.shape)
+        y_song = encoder.predict(x_rand)
+        songs.append(y_song[0])
+        # y_song = func([x_rand, 0])[0]
+        print(y_song.shape)
+        # y_song = func([x_rand, 0])[0]
+        midi.samples_to_midi(y_song[0], write_dir +
+                             'rand' + str(i) + '.mid', 16, thresh)
+    return np.array(songs)
 
 def make_rand_songs(write_dir, rand_vecs, thresh= 0.25):
     for i in range(rand_vecs.shape[0]):
@@ -82,7 +95,7 @@ def make_rand_songs(write_dir, rand_vecs, thresh= 0.25):
                              'rand' + str(i) + '.mid', 16, thresh)
 
 
-def make_rand_songs_normalized(write_dir, rand_vecs, thresh= 0.25):
+def make_rand_songs_normalized(write_dir, rand_vecs, thresh= 0.25, getResult= False):
     if VAEparams["use_embedding"]:
         x_enc = np.squeeze(pre_encoder.predict(musicVAE.data.x_orig))
     else:
@@ -106,7 +119,10 @@ def make_rand_songs_normalized(write_dir, rand_vecs, thresh= 0.25):
     np.save(write_dir + 'evecs.npy', v)
 
     x_vecs = x_mean + np.dot(rand_vecs * e, v)
-    make_rand_songs(write_dir, x_vecs, thresh)
+    if getResult:
+        songs= make_rand_songs_and_get_result(write_dir, x_vecs, thresh)
+    else:
+        make_rand_songs(write_dir, x_vecs, thresh)
 
     title = ''
     if '/' in write_dir:
@@ -131,6 +147,10 @@ def make_rand_songs_normalized(write_dir, rand_vecs, thresh= 0.25):
     plt.draw()
     plt.savefig(write_dir + 'stds.png')
 
+    if getResult:
+        return songs
+    else:
+        return None
 
 def plotScores(scores, fname, on_top=True):
     plt.clf()
@@ -210,6 +230,11 @@ if VAEparams["play_only"]:
 
 
     make_rand_songs_normalized(write_dir + '/', rand_vecs, 0.6)
+elif VAEparams["createTestingValues"]:
+    write_dir= '../evaluation_samples/overworld_theme';
+    testresults= make_rand_songs_normalized(write_dir + '/', rand_vecs, 0.25, True)
+
+    np.save('../evaluation_sets/overworld_theme/testsamples.npy', testresults)
 else:
     print("train")
     model.fit(

@@ -94,7 +94,7 @@ def get_pre_encoder(use_embedding, param_size, activation, max_length):
 
         return model
 
-def build_full_model(optimizer, use_embedding, param_size, activation_str, max_length, bn_m, do_rate, lr, vae_b1, vae_b2, epochs, batch_size, write_history, num_rand_songs, play_only, history_dir, log_dir, continue_training):
+def build_full_model(optimizer, use_embedding, param_size, activation_str, max_length, bn_m, do_rate, lr, vae_b1, vae_b2, epochs, batch_size, write_history, num_rand_songs, play_only, history_dir, log_dir, continue_training, createTestingValues):
     pre_encoder = get_pre_encoder(use_embedding= use_embedding, param_size= param_size, activation= activation_str, max_length= max_length)
     encoder = get_encoder(param_size= param_size, bn_m= bn_m, activation=activation_str, do_rate=do_rate, max_length=max_length)
 

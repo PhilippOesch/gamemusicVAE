@@ -86,7 +86,7 @@ def hcdf(samples, ignore_treshhold=True, thresh=0.5):
 
     t_c_samples = np.reshape(t_c_samples, ((
         t_c_samples.shape[0] * t_c_samples.shape[1]), t_c_samples.shape[2]))
-    print(t_c_samples.shape)
+    # print(t_c_samples.shape)
 
     # convolve signal with gaussian
     gaussian = signal.gaussian(t_c_samples.shape[0], std=8)
@@ -127,7 +127,7 @@ def samples_to_pitchclasses(samples, ignore_treshhold=True, thresh=0.5):
     return eq_t_samples
 
 
-def empty_bars(samples, thresh=0.05):
+def empty_bars(samples, thresh=0.1):
     empty_bar_count = 0
     for z in range(samples.shape[0]):
         is_empty = True
@@ -208,8 +208,8 @@ def tonal_distance(samples1, samples2, thresh= 0.5):
     hcdf_samples1= hcdf(samples= samples1, thresh= thresh)
     hcdf_samples2= hcdf(samples= samples2, thresh= thresh)
 
-    print(len(hcdf_samples1))
-    print(len(hcdf_samples2))
+    # print(len(hcdf_samples1))
+    # print(len(hcdf_samples2))
 
     total_distance= 0;
     for i in range(len(hcdf_samples1)):
@@ -220,7 +220,6 @@ def tonal_distance(samples1, samples2, thresh= 0.5):
     return total_distance, distance_per_frame
 
 def drum_pattern(samples, thresh= 0.5):
-    print("Data_shape", samples.shape)
     notes_counter= 0;
     dp_notes_counter= 0;
     for z in range(samples.shape[0]):
