@@ -16,7 +16,7 @@ VAEparams = {
     "write_history": False,
     "num_rand_songs": 100,
     "play_only": False,
-    "history_dir": '../History/overworld_themes_model7_transposed/',
+    "history_dir": '../History/overworld_transposed_stakkato/',
     "log_dir": '../tensorboard',
     "continue_training": False,
     "createTestingValues": True

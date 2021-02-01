@@ -1,6 +1,6 @@
 from tensorflow.keras.optimizers import Adam
-from musicVAE import *
-import midi
+import tensorflow as tf
+import utility.midi as midi
 import numpy as np
 import pydot
 import scipy
@@ -12,10 +12,10 @@ from tensorflow.keras.models import Model, Sequential, load_model
 from tensorflow.keras.wrappers.scikit_learn import KerasClassifier
 from sklearn.model_selection import GridSearchCV
 import os
-import util
+import utility.util as util
 
-import params
-import musicVAE
+from params import VAEparams
+import network.musicVAE as musicVAE
 
 # Create folder to save models into
 if not os.path.exists('../History'):
@@ -231,10 +231,10 @@ if VAEparams["play_only"]:
 
     make_rand_songs_normalized(write_dir + '/', rand_vecs, 0.6)
 elif VAEparams["createTestingValues"]:
-    write_dir= '../evaluation_samples/overworld_theme';
+    write_dir= '../evaluation_samples/battle_theme';
     testresults= make_rand_songs_normalized(write_dir + '/', rand_vecs, 0.25, True)
 
-    np.save('../evaluation_sets/overworld_theme/testsamples.npy', testresults)
+    np.save('../evaluation_sets/battle_theme/testsamples.npy', testresults)
 else:
     print("train")
     model.fit(
