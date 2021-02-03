@@ -4,7 +4,7 @@ import utility.util as util
 import numpy as np
 
 patterns = {}
-directory = "../sampleMidis/overworldTheme"
+directory = "../sampleMidis/battlethemes"
 all_samples = []
 all_lens = []
 print("Loading Songs...")

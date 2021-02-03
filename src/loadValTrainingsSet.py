@@ -4,7 +4,7 @@ import utility.util as util
 import numpy as np
 
 patterns = {}
-directory = "../sampleMidis/battlethemes"
+directory = "../sampleMidis/overworldTheme"
 all_samples = []
 song_num= 0
 print ("Loading Songs...")
@@ -29,6 +29,7 @@ for root, subdirs, files in os.walk(directory):
         if samples == []:
             continue
 
+        samples= util.centered_transposed(samples)
         all_samples+= samples
         song_num+= 1;
 

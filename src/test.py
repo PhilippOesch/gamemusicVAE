@@ -45,8 +45,34 @@ import utility.metrics as metrics
 # test_train= np.load('../evaluation_sets/overworld_theme/train_set_samples.npy')
 # midi.samples_to_midi(test_train[1], '../samples/testtesttesttest.mid', 96)
 
-val_dir = "../evaluation_sets/battle_theme"
+val_dir = "../evaluation_sets/overworld_theme"
 
 train_set = np.load(val_dir + '/train_set_samples.npy')
 val_set = np.load(val_dir + '/testsamples.npy')
+
+hcdf1= metrics.hcdf(samples= train_set[0], ignore_treshhold=False, thresh=0.25)
+hcdf2= metrics.hcdf(samples= val_set[0], ignore_treshhold=False, thresh=0.25)
+#plot hcdf_results
+# plt.plot(hcdf_results)
+# plt.ylabel('TCDF')
+# plt.xlabel('Time step')
+# plt.show()
+
+plt.figure(figsize=(16, 9))
+plt.subplot(211)
+plt.title("Train-set")
+line1= plt.plot(hcdf1)
+plt.ylabel('TCDF')
+plt.xlabel('Time step')
+plt.setp(line1, color='r', linewidth=2.0)
+
+plt.subplot(212)
+plt.title("AI-Val-set")
+line2= plt.plot(hcdf2)
+plt.ylabel('TCDF')
+plt.xlabel('Time step')
+plt.setp(line2, color='b', linewidth=2.0)
+
+plt.savefig('../evaluation_results/overworld_theme/HCDF_Train_to_val_comparison.png')
+
 

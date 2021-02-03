@@ -34,7 +34,6 @@ def midi_to_samples(fname):
         for msg in track:
             abs_time += msg.time
             if msg.type == 'note_on' or msg.type == 'note_off':
-                print(msg)
                 note = msg.note - (128- num_notes)/ 2
                 if msg.type == 'note_on':
                     if msg.velocity == 0:
@@ -76,7 +75,6 @@ def midi_to_samples(fname):
                 sample[start_ix, int(note)]= 1
     
     return samples
-
 
 
 def samples_to_midi(samples, fname, ticks_per_sample, thresh=0.5):

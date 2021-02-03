@@ -221,6 +221,8 @@ class CustomCallback(tf.keras.callbacks.Callback):
 
 callback = CustomCallback()
 
+model.summary()
+
 if VAEparams["play_only"]:
     # encoder= load_model('../model/encoder_model.h5')
     # # pre_encoder= load_model('../model/pre_encoder_model.h5', custom_objects={'VAE_B1': VAEparams["vae_b1"], 'vae_loss': vae_loss})
@@ -244,6 +246,8 @@ else:
         batch_size=VAEparams["batch_size"],
         callbacks=[callback],
     )
+
+
 
 # for i in range(10):
 #     print("test")

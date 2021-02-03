@@ -125,22 +125,23 @@ write_evaluation('train_set_evaluation.txt', "Train_Results Evaluation",
                  metric_lables, train_evaluation_values)
 
 # Evaluation AI-Result-set
-print("evaluating AI_Results")
-val_set = np.load(val_dir + '/testsamples.npy')
-print("AI_Results Shape: ", val_set.shape)
-val_eb_rate = evaluate_eb(val_set)
-val_dp_rate = evaluate_dp(val_set, thresh)
-val_poly_rate = evaluate_polyphonicity(val_set, thresh)
-val_upc_avg = evaluate_upc_average(val_set, thresh)
-val_td_rate = evaluate_tonal_distance(val_set, thresh)
+# print("evaluating AI_Results")
+# val_set = np.load(val_dir + '/testsamples.npy')
+# print("AI_Results Shape: ", val_set.shape)
+# val_eb_rate = evaluate_eb(val_set)
+# val_dp_rate = evaluate_dp(val_set, thresh)
+# val_poly_rate = evaluate_polyphonicity(val_set, thresh)
+# val_upc_avg = evaluate_upc_average(val_set, thresh)
+# val_td_rate = evaluate_tonal_distance(val_set, thresh)
 
-val_evaluation_values = [val_eb_rate, val_dp_rate,
-                         val_poly_rate, val_upc_avg, val_td_rate]
+# val_evaluation_values = [val_eb_rate, val_dp_rate,
+#                          val_poly_rate, val_upc_avg, val_td_rate]
 
-write_evaluation('aI_val_set_evaluation.txt',
-                 "AI_Results Evaluation", metric_lables, val_evaluation_values
+# write_evaluation('aI_val_set_evaluation.txt',
+#                  "AI_Results Evaluation", metric_lables, val_evaluation_values)
 
 # val1= evaluate_notes_per_song(train_set, thresh)
 # val2= evaluate_notes_per_song(val_set, thresh)
 
 # write_note_count('note_counts.txt', "Note Counts:", val1, val2)
+

@@ -11,13 +11,13 @@ VAEparams = {
     "lr": 0.00075,
     "vae_b1": 0.02,
     "vae_b2": 0.1,
-    "epochs": 500,
+    "epochs": 2000,
     "batch_size": 350,
-    "write_history": False,
-    "num_rand_songs": 100,
+    "write_history": True,
+    "num_rand_songs": 10,
     "play_only": False,
-    "history_dir": '../History/overworld_transposed_stakkato/',
+    "history_dir": '../History/battletheme_more_data/',
     "log_dir": '../tensorboard',
     "continue_training": False,
-    "createTestingValues": True
+    "createTestingValues": False
 }
