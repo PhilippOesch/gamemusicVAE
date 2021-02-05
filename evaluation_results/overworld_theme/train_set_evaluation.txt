@@ -1,7 +1,8 @@
 Train_Results Evaluation
 
-Empty Bars: 0.022931654676258992
-Drum Pattern: 0.7360616572310317
-Polyphonicity: 0.585072627603003
-Average amount of different pitch classes: 5.636241007194244
-Tonal Distance between tracks: 0.14297084963322995
+Empty Bars: 0.019386574074074073
+Drum Pattern: 0.7752022318371531
+Polyphonicity: 0.6044359404839111
+Average amount of different pitch classes: 5.848090277777778
+Tonal Distance between tracks: 0.2865781537771234
+average Song Note count: 431.4537037037037

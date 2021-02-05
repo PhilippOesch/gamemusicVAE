@@ -1,0 +1,7 @@
+AI_Results Evaluation
+
+Empty Bars: 0.00125
+Drum Pattern: 0.8887051096699264
+Polyphonicity: 0.5464275412286235
+Average amount of different pitch classes: 5.013125
+Tonal Distance between tracks: 0.30218638760228067

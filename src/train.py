@@ -226,7 +226,7 @@ model.summary()
 if VAEparams["play_only"]:
     # encoder= load_model('../model/encoder_model.h5')
     # # pre_encoder= load_model('../model/pre_encoder_model.h5', custom_objects={'VAE_B1': VAEparams["vae_b1"], 'vae_loss': vae_loss})
-    write_dir= '../Testsamples/overworld_theme/';
+    write_dir= '../Testsamples/battle_theme/';
     if not os.path.exists(write_dir):
         os.makedirs(write_dir)
 

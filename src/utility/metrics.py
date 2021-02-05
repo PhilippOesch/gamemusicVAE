@@ -50,50 +50,29 @@ def get_note_count(samples, thresh= 0.25):
 
 
 
-def hcdf(samples, ignore_treshhold=True, thresh=0.5):
+def hcdf(samples1, ignore_treshhold=True, thresh=0.5):
     #     # 12 Tone Equal Temperament
-    eq_t_samples = samples_to_pitchclasses(samples)
+    eq_t_samples = samples_to_pitchclasses(samples1, ignore_treshhold, thresh)
 
-#     # 6d Vectors for tonal centroid calculation
-    t_c_samples = np.zeros(
-        (samples.shape[0], samples.shape[1], 6), dtype=np.float32)
-
-#     # print(eq_t_samples)
-
-    for z in range(eq_t_samples.shape[0]):
-        for y in range(eq_t_samples.shape[1]):
-            y_d6 = [get_transformation_matrix(
-                x) * eq_t_samples[z, y, x] for x in range(eq_t_samples.shape[2])]
-            sum_y = np.sum(y_d6, axis=0)
-            # print(sum_y)
-            l_norm = np.linalg.norm(eq_t_samples[z, y])
-            zeta_y = sum_y * (1 / l_norm)
-            zeta_y = np.nan_to_num(zeta_y)
-            t_c_samples[z, y] = zeta_y
-
-    t_c_samples = np.reshape(t_c_samples, ((
-        t_c_samples.shape[0] * t_c_samples.shape[1]), t_c_samples.shape[2]))
-    # print(t_c_samples.shape)
+     # 6d Vectors for tonal centroid calculation
+    t_c_samples = get_t_c_samples(samples= eq_t_samples)
 
     # convolve signal with gaussian
-    gaussian = signal.gaussian(t_c_samples.shape[0], std=8)
-    # gaussian = signal.gaussian(100, std=8)
+    gaussian = signal.gaussian(100, std=8)
     filter = np.zeros((t_c_samples.shape[0], t_c_samples.shape[1]))
 
-    #Convolve each row
+
+    # Convolve each row
     for i in range(6):
         filter[:, i]= signal.convolve(t_c_samples[:, i], gaussian, mode= 'same')
 
     hcdf_results = []
-    # for i in range(1, t_c_samples.shape[0]-1):
-    #     epsilon = np.sqrt(np.sum((t_c_samples[i-1] - t_c_samples[i+1])**2))
-    #     hcdf_results.append(epsilon)
+
     for i in range(1, filter.shape[0]-1):
         epsilon = np.sqrt(np.sum((filter[i-1] - filter[i+1])**2))
         hcdf_results.append(epsilon)
 
     return hcdf_results
-
 
 def samples_to_pitchclasses(samples, ignore_treshhold=True, thresh=0.5):
     eq_t_samples = np.zeros(
@@ -113,6 +92,25 @@ def samples_to_pitchclasses(samples, ignore_treshhold=True, thresh=0.5):
 
     return eq_t_samples
 
+def get_t_c_samples(samples):
+    t_c_samples = np.zeros(
+        (samples.shape[0], samples.shape[1], 6), dtype=np.float32)
+
+    for z in range(samples.shape[0]):
+        for y in range(samples.shape[1]):
+            y_d6 = [get_transformation_matrix(
+                x) * samples[z, y, x] for x in range(samples.shape[2])]
+            sum_y = np.sum(y_d6, axis=0)
+            # print(sum_y)
+            l_norm = np.linalg.norm(samples[z, y])
+            zeta_y = sum_y * (1 / l_norm)
+            zeta_y = np.nan_to_num(zeta_y)
+            t_c_samples[z, y] = zeta_y
+
+    t_c_samples = np.reshape(t_c_samples, ((
+        t_c_samples.shape[0] * t_c_samples.shape[1]), t_c_samples.shape[2]))
+
+    return t_c_samples
 
 def empty_bars(samples, thresh=0.1):
     empty_bar_count = 0
@@ -192,20 +190,22 @@ def get_transformation_matrix(l):
 
     return t_matrix
 
-def tonal_distance(samples1, samples2, thresh= 0.5):
-    hcdf_samples1= hcdf(samples= samples1, thresh= thresh)
-    hcdf_samples2= hcdf(samples= samples2, thresh= thresh)
+def tonal_distance(samples1, samples2, ignore_treshhold, thresh= 0.5):
+        #     # 12 Tone Equal Temperament
+    eq_t_samples1 = samples_to_pitchclasses(samples1, ignore_treshhold, thresh)
+    eq_t_samples2 = samples_to_pitchclasses(samples2, ignore_treshhold, thresh)
 
-    # print(len(hcdf_samples1))
-    # print(len(hcdf_samples2))
+#     # 6d Vectors for tonal centroid calculation
+    t_c_samples1 = get_t_c_samples(samples= eq_t_samples1)
+    t_c_samples2 = get_t_c_samples(samples= eq_t_samples2)
+    # print(t_c_samples.shape)
 
-    total_distance= 0;
-    for i in range(len(hcdf_samples1)):
-        total_distance += abs(hcdf_samples1[i]- hcdf_samples2[i])
-    
-    distance_per_frame= total_distance/ len(hcdf_samples1)
+    hcdf_results = []
+    for i in range(t_c_samples1.shape[0]):
+        epsilon = np.sqrt(np.sum((t_c_samples1[i] - t_c_samples2[i])**2))
+        hcdf_results.append(epsilon)
 
-    return total_distance, distance_per_frame
+    return hcdf_results, np.sum(hcdf_results)/ t_c_samples1.shape[0]
 
 def drum_pattern(samples, thresh= 0.5):
     notes_counter= 0;

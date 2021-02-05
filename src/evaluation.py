@@ -7,12 +7,16 @@ import params
 import network.musicVAE as musicVAE
 import utility.metrics as metrics
 
+model1name = "overworld_theme"
+model2name = "battle_theme"
+
 metric_lables = [
     "Empty Bars",
     "Drum Pattern",
     "Polyphonicity",
     "Average amount of different pitch classes",
-    "Tonal Distance between tracks"
+    "Tonal Distance between tracks",
+    "average Song Note count"
 ]
 
 
@@ -56,7 +60,7 @@ def evaluate_tonal_distance(data_set, thresh):
                 print("Comparison Counter: ", comparison_counter)
                 comparison_counter += 1
                 _, comparisson_td = metrics.tonal_distance(
-                    value, compare_value)
+                    value, compare_value, ignore_treshhold= False, thresh= thresh)
                 total_sum += comparisson_td
             missing_sets = np.delete(missing_sets, value, axis=0)
     print(comparison_counter)
@@ -73,17 +77,19 @@ def evaluate_upc_average(data_set, thresh):
 
     return total_upc / data_set.shape[0]
 
+
 def evaluate_notes_per_song(data_set, thresh):
     print("Evaluate Notes per Song")
-    total_note_counter= 0
-    
-    for song in data_set:
-        total_note_counter+= metrics.get_note_count(song, thresh)
-    
-    return total_note_counter/ data_set.shape[0]
+    total_note_counter = 0
 
-def write_evaluation(file_name, title, metric_labels, values):
-    write_dir = '../evaluation_results/overworld_theme/'
+    for song in data_set:
+        total_note_counter += metrics.get_note_count(song, thresh)
+
+    return total_note_counter / data_set.shape[0]
+
+
+def write_evaluation(file_name, modelname, title, metric_labels, values):
+    write_dir = '../evaluation_results/' + modelname + '/'
     if not os.path.exists(write_dir):
         os.makedirs(write_dir)
 
@@ -93,55 +99,53 @@ def write_evaluation(file_name, title, metric_labels, values):
         for metric, value in zip(metric_labels, values):
             f.write(metric + ": " + str(value) + "\n")
 
-def write_note_count(file_name, title, value1, value2):
-    write_dir = '../evaluation_results/overworld_theme/'
-    if not os.path.exists(write_dir):
-        os.makedirs(write_dir)
-
-    with open(write_dir + file_name, 'w') as f:
-        f.write(title + "\n\n")
-        f.write("Train_set Note count: "+ str(value1) + "\n")
-        f.write("AI_val_set Note count: "+ str(value2) + "\n")
-
 
 # Params
-val_dir = "../evaluation_sets/overworld_theme"
+val_dir1 = "../evaluation_sets/" + model1name
+val_dir2 = "../evaluation_sets/" + model2name
 thresh = 0.25
 
 # Evaluation Train Set
-print("evaluating Train_Set:")
-train_set = np.load(val_dir + '/train_set_samples.npy')
-print("Test_Set Shape: ", train_set.shape)
-train_eb_rate = evaluate_eb(train_set)
-train_dp_rate = evaluate_dp(train_set, thresh)
-train_poly_rate = evaluate_polyphonicity(train_set, thresh)
-train_upc_avg = evaluate_upc_average(train_set, thresh)
-train_td_rate = evaluate_tonal_distance(train_set, thresh)
+print("evaluating Train_Set1:")
+train_set_model1 = np.load(val_dir1 + '/train_set_samples.npy')
+print("Test_Set Shape: ", train_set_model1.shape)
+model1_train_eval_results = [evaluate_eb(train_set_model1), evaluate_dp(train_set_model1, thresh), evaluate_polyphonicity(train_set_model1, thresh), evaluate_upc_average(
+    train_set_model1, thresh), evaluate_tonal_distance(train_set_model1[:100], thresh), evaluate_notes_per_song(train_set_model1, thresh)]
 
-train_evaluation_values = [train_eb_rate,
-                           train_dp_rate, train_poly_rate, train_upc_avg, train_td_rate]
 
-write_evaluation('train_set_evaluation.txt', "Train_Results Evaluation",
-                 metric_lables, train_evaluation_values)
+write_evaluation('train_set_evaluation.txt', model1name, "Train_Results Evaluation",
+                 metric_lables, model1_train_eval_results)
 
 # Evaluation AI-Result-set
-# print("evaluating AI_Results")
-# val_set = np.load(val_dir + '/testsamples.npy')
-# print("AI_Results Shape: ", val_set.shape)
-# val_eb_rate = evaluate_eb(val_set)
-# val_dp_rate = evaluate_dp(val_set, thresh)
-# val_poly_rate = evaluate_polyphonicity(val_set, thresh)
-# val_upc_avg = evaluate_upc_average(val_set, thresh)
-# val_td_rate = evaluate_tonal_distance(val_set, thresh)
+print("evaluating AI_Results1")
+val_set_model1 = np.load(val_dir1 + '/testsamples.npy')
+print("AI_Results Shape: ", val_set_model1.shape)
+model1_val_eval_results = [evaluate_eb(val_set_model1), evaluate_dp(val_set_model1, thresh), evaluate_polyphonicity(val_set_model1, thresh), evaluate_upc_average(
+    val_set_model1, thresh), evaluate_tonal_distance(val_set_model1, thresh), evaluate_notes_per_song(val_set_model1, thresh)]
 
-# val_evaluation_values = [val_eb_rate, val_dp_rate,
-#                          val_poly_rate, val_upc_avg, val_td_rate]
 
-# write_evaluation('aI_val_set_evaluation.txt',
-#                  "AI_Results Evaluation", metric_lables, val_evaluation_values)
+write_evaluation('aI_val_set_evaluation.txt', model1name,
+                 "AI_Results Evaluation", metric_lables, model1_val_eval_results)
 
-# val1= evaluate_notes_per_song(train_set, thresh)
-# val2= evaluate_notes_per_song(val_set, thresh)
 
-# write_note_count('note_counts.txt', "Note Counts:", val1, val2)
+# Evaluation Train Set
+print("evaluating Train_Set2:")
+train_set_model2 = np.load(val_dir2 + '/train_set_samples.npy')
+print("Test_Set Shape: ", train_set_model2.shape)
+model2_train_eval_results = [evaluate_eb(train_set_model2), evaluate_dp(train_set_model2, thresh), evaluate_polyphonicity(train_set_model2, thresh), evaluate_upc_average(
+    train_set_model2, thresh), evaluate_tonal_distance(train_set_model2[:100], thresh), evaluate_notes_per_song(train_set_model2, thresh)]
 
+write_evaluation('train_set_evaluation.txt', model2name, "Train_Results Evaluation",
+                 metric_lables, model2_train_eval_results)
+
+
+# Evaluation AI-Result-set
+print("evaluating AI_Results2")
+val_set_model2 = np.load(val_dir2 + '/testsamples.npy')
+print("AI_Results Shape: ", val_set_model2.shape)
+model2_val_eval_results = [evaluate_eb(val_set_model2), evaluate_dp(val_set_model2, thresh), evaluate_polyphonicity(val_set_model2, thresh), evaluate_upc_average(
+    val_set_model2, thresh), evaluate_tonal_distance(val_set_model2, thresh), evaluate_notes_per_song(val_set_model2, thresh)]
+
+
+write_evaluation('aI_val_set_evaluation.txt', model2name,
+                 "AI_Results Evaluation", metric_lables, model2_val_eval_results)
