@@ -1,4 +1,0 @@
-Note Counts:
-
-Train_set Note count: 715.593984962406
-AI_val_set Note count: 267.04

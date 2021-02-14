@@ -50,9 +50,9 @@ def get_note_count(samples, thresh= 0.25):
 
 
 
-def hcdf(samples1, ignore_treshhold=True, thresh=0.5):
+def hcdf(samples, ignore_treshhold=True, thresh=0.5):
     #     # 12 Tone Equal Temperament
-    eq_t_samples = samples_to_pitchclasses(samples1, ignore_treshhold, thresh)
+    eq_t_samples = samples_to_pitchclasses(samples, ignore_treshhold, thresh)
 
      # 6d Vectors for tonal centroid calculation
     t_c_samples = get_t_c_samples(samples= eq_t_samples)

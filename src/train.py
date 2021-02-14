@@ -36,15 +36,13 @@ if not os.path.exists('../Testsamples'):
 z_log_sigma_sq = 0.0
 z_mean = 0.0
 
-model, encoder, pre_encoder = musicVAE.build_full_model(**VAEparams)
+model, decoder, encoder = musicVAE.build_full_model(**VAEparams)
+model.build((None, musicVAE.y_shape[1], musicVAE.y_shape[2], musicVAE.y_shape[3]))
 if VAEparams["play_only"] or VAEparams["continue_training"] or VAEparams["createTestingValues"]:
-    # encoder= load_model('../model/encoder_model')
-    # pre_encoder= load_model('../model/pre_encoder_model')
     if VAEparams["write_history"]:
         model.load_weights(VAEparams["history_dir"]+'model_weights.h5')
     else:
         model.load_weights('../model/model_weights.h5')
-    # pre_encoder= load_model('../model/pre_encoder_model.h5', custom_objects={'VAE_B1': musicVAE.vae_b1, 'vae_loss': musicVAE.vae_loss})
 
 # save_config()
 train_loss = []
@@ -61,9 +59,6 @@ rand_vecs = np.random.normal(
     0.0, 1.0, (VAEparams["num_rand_songs"], VAEparams["param_size"]))
 np.save('../model/rand.npy', rand_vecs)
 
-# def to_song(encoded_output):
-#     return np.squeeze(decoder([np.round(encoded_output), 0])[0])
-
 
 def reg_mean_std(x):
     s = K.log(K.sum(x * x))
@@ -74,7 +69,7 @@ def make_rand_songs_and_get_result(write_dir, rand_vecs, thresh= 0.25):
     for i in range(rand_vecs.shape[0]):
         x_rand = rand_vecs[i:i+1]
         # print(x_rand.shape)
-        y_song = encoder.predict(x_rand)
+        y_song = decoder.predict(x_rand)
         songs.append(y_song[0])
         # y_song = func([x_rand, 0])[0]
         print(y_song.shape)
@@ -87,7 +82,7 @@ def make_rand_songs(write_dir, rand_vecs, thresh= 0.25):
     for i in range(rand_vecs.shape[0]):
         x_rand = rand_vecs[i:i+1]
         # print(x_rand.shape)
-        y_song = encoder.predict(x_rand)
+        y_song = decoder.predict(x_rand)
         # y_song = func([x_rand, 0])[0]
         print(y_song.shape)
         # y_song = func([x_rand, 0])[0]
@@ -97,14 +92,16 @@ def make_rand_songs(write_dir, rand_vecs, thresh= 0.25):
 
 def make_rand_songs_normalized(write_dir, rand_vecs, thresh= 0.25, getResult= False):
     if VAEparams["use_embedding"]:
-        x_enc = np.squeeze(pre_encoder.predict(musicVAE.data.x_orig))
+        x_enc = np.squeeze(encoder.predict(musicVAE.data.x_orig))[1]
     else:
-        x_enc = np.squeeze(pre_encoder.predict(musicVAE.data.y_orig))
+        x_enc = np.squeeze(encoder.predict(musicVAE.data.y_orig))[1]
 
     x_mean = np.mean(x_enc, axis=0)
+    print("x_mean_shape: ", x_mean.shape)
+    print("x_enc_shape: ", x_enc.shape)
     x_stds = np.std(x_enc, axis=0)
     x_cov = np.cov((x_enc - x_mean).T)
-    print(x_cov.shape)
+
     # u, s, v = np.linalg.svd(x_cov)
     x_cov = np.nan_to_num(x_cov)
     u, s, v = scipy.linalg.svd(x_cov)
@@ -200,10 +197,10 @@ class CustomCallback(tf.keras.callbacks.Callback):
                 # pre_encoder.save('../History/BattleTheme/pre_encoder_model')
                 model.save_weights(
                     VAEparams["history_dir"] + 'model_weights.h5')
+                decoder.save_weights(
+                    VAEparams["history_dir"] + 'decoder_weights.h5')
                 encoder.save_weights(
                     VAEparams["history_dir"] + 'encoder_weights.h5')
-                pre_encoder.save_weights(
-                    VAEparams["history_dir"] + 'pre_encoder_weights.h5')
 
                 model.summary()
 
@@ -220,8 +217,6 @@ class CustomCallback(tf.keras.callbacks.Callback):
 
 
 callback = CustomCallback()
-
-model.summary()
 
 if VAEparams["play_only"]:
     # encoder= load_model('../model/encoder_model.h5')
@@ -246,7 +241,6 @@ else:
         batch_size=VAEparams["batch_size"],
         callbacks=[callback],
     )
-
 
 
 # for i in range(10):

@@ -1,0 +1,9 @@
+Comparrison of train_set and generated samples of battle_theme
+
+i: 0: 0.29127317339269304
+i: 1: 0.2838801415114576
+i: 2: 0.2802474819378657
+i: 3: 0.2765371961662965
+i: 4: 0.27182246524829656
+Avarage Tonal Distance: 0.28075209165132187
+Lowest Tonal Distance between 2 Songs: 0.06534794469674428

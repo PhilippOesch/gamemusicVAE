@@ -50,8 +50,11 @@ val_dir = "../evaluation_sets/overworld_theme"
 train_set = np.load(val_dir + '/train_set_samples.npy')
 val_set = np.load(val_dir + '/testsamples.npy')
 
-hcdf1= metrics.hcdf(samples= train_set[0], ignore_treshhold=False, thresh=0.25)
-hcdf2= metrics.hcdf(samples= val_set[0], ignore_treshhold=False, thresh=0.25)
+hcdf1= metrics.hcdf(samples= train_set[1], ignore_treshhold=False, thresh=0.25)
+hcdf2= metrics.hcdf(samples= val_set[1], ignore_treshhold=False, thresh=0.25)
+
+tonal_d1= metrics.tonal_distance(train_set[1], train_set[2], ignore_treshhold=False, thresh=0.25)
+tonal_d2= metrics.tonal_distance(val_set[1], val_set[2], ignore_treshhold=False, thresh=0.25)
 #plot hcdf_results
 # plt.plot(hcdf_results)
 # plt.ylabel('TCDF')
@@ -76,3 +79,19 @@ plt.setp(line2, color='b', linewidth=2.0)
 plt.savefig('../evaluation_results/overworld_theme/HCDF_Train_to_val_comparison.png')
 
 
+plt.figure(figsize=(16, 9))
+plt.subplot(211)
+plt.title("Train-set")
+line1= plt.plot(tonal_d1)
+plt.ylabel('Tonal Distance sample[0], sample[1]')
+plt.xlabel('Time step')
+plt.setp(line1, color='r', linewidth=2.0)
+
+plt.subplot(212)
+plt.title("AI-Val-set")
+line2= plt.plot(tonal_d2)
+plt.ylabel('Tonal Distance sample[0], sample[1]')
+plt.xlabel('Time step')
+plt.setp(line2, color='b', linewidth=2.0)
+
+plt.savefig('../evaluation_results/overworld_theme/TD_Train_to_val_comparison.png')
