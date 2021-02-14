@@ -1,0 +1,4 @@
+Model1
+
+optimizer: <class 'tensorflow.python.keras.optimizer_v2.adam.Adam'> - param_size: 120 - activation_str: relu - max_length: 16 - bn_m: 0.9 - do_rate: 0.1 - lr: 0.001 - epochs: 50 - batch_size: 250 - use_batchnorm: False - ignore_encoder_layer2: False - Model1
+loss: 88.789635 - reconstruction_loss: 87.10629 - kl_loss: 1.683338 - 
