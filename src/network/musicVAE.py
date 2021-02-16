@@ -1,104 +1,44 @@
-import numpy as np
+from matplotlib import use
 import tensorflow as tf
-from tensorflow import keras
-from tensorflow.keras import layers
-from tensorflow.keras.layers import Input, Embedding, Flatten, Reshape, BatchNormalization, TimeDistributed, Dense, Activation, Dropout
-from tensorflow.keras.models import Model
-from tensorflow.keras.metrics import Mean
+from tensorflow.keras.layers import Input, Embedding, Flatten, Dense, Lambda, TimeDistributed, Reshape, Activation, Dropout, BatchNormalization
+from tensorflow.keras.models import Model, Sequential, load_model
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras import backend as K
 from tensorflow.keras.backend import learning_phase
 from tensorflow.keras.utils import plot_model
+from tensorflow.keras.losses import binary_crossentropy
+from tensorflow.keras.optimizers import *
 from network.data import *
+from tensorflow.keras.backend import learning_phase
 
+from params import *
+
+vae_b1 = GeneralParams["vae_b1"]
+vae_b2 = GeneralParams["vae_b2"]
 data = Data(use_embedding=False)
 x_train, y_train, x_shape, y_shape = data.get_train_set()
-encoder= None
-decoder= None
-
-class Sampling(layers.Layer):
-
-    def call(self, inputs):
-        z_mean, z_log_var = inputs
-        batch = tf.shape(z_mean)[0]
-        dim = tf.shape(z_mean)[1]
-        epsilon = tf.keras.backend.random_normal(shape=(batch, dim))
-        return z_mean + tf.exp(0.5 * z_log_var) * epsilon
+z_log_sigma_sq = 0.0
+z_mean = 0.0
 
 
-class MusicVAE(keras.Model):
-    def __init__(self, encoder, decoder, **kwargs):
-        super(MusicVAE, self).__init__(**kwargs)
-        self.encoder = encoder
-        self.decoder = decoder
-        self.total_loss_tracker = Mean(name="total_loss")
-        self.reconstruction_loss_tracker = Mean(name="reconstruction_loss")
-        self.kl_loss_tracker = Mean(name="kl_loss")
-
-    @property
-    def metrics(self):
-        return[
-            self.total_loss_tracker,
-            self.reconstruction_loss_tracker,
-            self.kl_loss_tracker,
-        ]
-
-    def train_step(self, data):
-        with tf.GradientTape() as tape:
-            z_mean, z_log_var, z = self.encoder(data)
-            reconstruction = self.decoder(z)
-            reconstruction_loss = tf.reduce_mean(
-                tf.reduce_sum(
-                    keras.losses.binary_crossentropy(data, reconstruction), axis=(1, 2)
-                )
-            )
-            kl_loss = -0.5 * (1 + z_log_var -
-                              tf.square(z_mean) - tf.exp(z_log_var))
-            kl_loss = tf.reduce_mean(tf.reduce_sum(kl_loss, axis=1))
-            total_loss = reconstruction_loss + kl_loss
-        grads = tape.gradient(total_loss, self.trainable_weights)
-        self.optimizer.apply_gradients(zip(grads, self.trainable_weights))
-        self.total_loss_tracker.update_state(total_loss)
-        self.reconstruction_loss_tracker.update_state(reconstruction_loss)
-        self.kl_loss_tracker.update_state(kl_loss)
-        return {
-            "loss": self.total_loss_tracker.result(),
-            "reconstruction_loss": self.reconstruction_loss_tracker.result(),
-            "kl_loss": self.kl_loss_tracker.result(),
-        }
-
-    def call(self, x):
-        x = self.encoder(x)
-        x = self.decoder(x)
-        return x
-
-    def get_metrics(self):
-        return {
-            "loss": self.total_loss_tracker.result().numpy(),
-            "reconstruction_loss": self.reconstruction_loss_tracker.result().numpy(),
-            "kl_loss": self.kl_loss_tracker.result().numpy(),
-        }
+def vae_loss(x, x_decoded_mean):
+    xent_loss = binary_crossentropy(x, x_decoded_mean)
+    kl_loss = vae_b2 * K.mean(1 + z_log_sigma_sq -
+                              K.square(z_mean) - K.exp(z_log_sigma_sq), axis=None)
+    return xent_loss - kl_loss
 
 
-def get_encoder(param_size, activation, ignore_encoder_layer2):
-
-    x_in = Input(shape=y_shape[1:])
-    x = Reshape((y_shape[1], -1))(x_in)
-    x = TimeDistributed(Dense(2000, activation=activation))(x)
-    if not ignore_encoder_layer2:
-        x = TimeDistributed(Dense(200, activation=activation))(x)
-    x = Flatten()(x)
-    x = Dense(1600, activation=activation)(x)
-    z_mean = Dense(param_size, name="z_mean")(x)
-    z_log_var = Dense(param_size, name="z_log_var")(x)
-    z = Sampling()([z_mean, z_log_var])
-    encoder = Model(x_in, [z_mean, z_log_var, z], name="encoder")
-    encoder.summary()
-    return encoder
+def vae_sampling(args):
+    z_mean, z_log_sigma_sq = args
+    epsilon = K.random_normal(shape=K.shape(z_mean), mean=0.0, stddev=vae_b1)
+    return z_mean + K.exp(z_log_sigma_sq * 0.5) * epsilon
 
 
 def get_decoder(param_size, bn_m, activation, do_rate, max_length, use_batchnorm):
-    x_in = Input(shape=(param_size,))
+    x_in = Input(name='encoder', shape=(param_size,))
     x = Dense(1600)(x_in)
-    x = BatchNormalization(momentum=bn_m)(x)
+    if use_batchnorm:
+        x = BatchNormalization(momentum=bn_m)(x)
     x = Activation(activation)(x)
     if do_rate > 0:
         x = Dropout(do_rate)(x)
@@ -122,18 +62,54 @@ def get_decoder(param_size, bn_m, activation, do_rate, max_length, use_batchnorm
         Dense(y_shape[2] * y_shape[3], activation='sigmoid'))(x)
     x = Reshape((y_shape[1], y_shape[2], y_shape[3]))(x)
 
-    decoder = Model(x_in, x, name="decoder")
-    decoder.summary()
-    return decoder
+    if learning_phase:
+        model = Model(x_in, x)
+        # model= K.function([x_in], [x])
+    else:
+        model = Model(x_in, x)
+        plot_model(model, to_file='../model/encoder_model.png',
+                   show_shapes=True)
+
+    return model
+
+
+def get_encoder(param_size, activation, ignore_encoder_layer2):
+    x_in = Input(shape=y_shape[1:])
+    x = Reshape((y_shape[1], -1))(x_in)
+
+    x = TimeDistributed(Dense(2000, activation=activation))(x)
+
+    if not ignore_encoder_layer2:
+        x = TimeDistributed(Dense(200, activation=activation))(x)
+
+    x = Flatten()(x)
+
+    x = Dense(1600, activation=activation)(x)
+
+    z_mean = Dense(param_size)(x)
+    z_log_sigma_sq = Dense(param_size)(x)
+    x_out = Lambda(vae_sampling, output_shape=(param_size,),
+                   name='pre_encoder')([z_mean, z_log_sigma_sq])
+
+    model = Model(x_in, x_out)
+
+    plot_model(model, to_file='../model/pre_encoder_model.png',
+               show_shapes=True)
+
+    return model
 
 
 def build_full_model(optimizer, param_size, activation_str, max_length, bn_m, do_rate, lr, epochs, batch_size, use_batchnorm, ignore_encoder_layer2):
-    encoder = get_encoder(param_size, activation_str, ignore_encoder_layer2)
-    decoder = get_decoder(param_size, bn_m, activation_str,
-                          do_rate, max_length, use_batchnorm)
-    vae = MusicVAE(encoder, decoder)
-    vae.compile(loss="kl_loss", optimizer=optimizer(lr=lr))
+    encoder = get_encoder(
+        param_size=param_size,activation=activation_str, ignore_encoder_layer2=ignore_encoder_layer2)
+    decoder = get_decoder(param_size=param_size, bn_m=bn_m,
+                          activation=activation_str, do_rate=do_rate, max_length=max_length, use_batchnorm= use_batchnorm)
 
-    # plot_model(vae, to_file='../model/model.png', show_shapes=True)
+    x_in = encoder.input
+    x_out = decoder(encoder.output)
+    model = Model(x_in, x_out)
+    model.compile(optimizer=optimizer(lr=lr), loss=vae_loss)
 
-    return vae, decoder, encoder
+    plot_model(model, to_file='../model/model.png', show_shapes=True)
+
+    return model, decoder, encoder

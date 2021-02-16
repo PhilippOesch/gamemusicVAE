@@ -4,6 +4,7 @@ from scipy import signal
 import matplotlib.pyplot as plt
 
 num_notes = 88
+min_tresh= 0.01
 
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
@@ -200,12 +201,15 @@ def tonal_distance(samples1, samples2, ignore_treshhold, thresh= 0.5):
     t_c_samples2 = get_t_c_samples(samples= eq_t_samples2)
     # print(t_c_samples.shape)
 
+    under_thresh_counter= 0
     hcdf_results = []
     for i in range(t_c_samples1.shape[0]):
         epsilon = np.sqrt(np.sum((t_c_samples1[i] - t_c_samples2[i])**2))
+        if epsilon< min_tresh:
+            under_thresh_counter+= 1
         hcdf_results.append(epsilon)
 
-    return hcdf_results, np.sum(hcdf_results)/ t_c_samples1.shape[0]
+    return hcdf_results, np.sum(hcdf_results)/ t_c_samples1.shape[0], under_thresh_counter
 
 def drum_pattern(samples, thresh= 0.5):
     notes_counter= 0;

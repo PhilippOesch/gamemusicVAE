@@ -94,7 +94,7 @@ def make_rand_songs(write_dir, rand_vecs, thresh= 0.25):
 
 def make_rand_songs_normalized(write_dir, rand_vecs, thresh= 0.25, getResult= False):
 
-    x_enc = np.squeeze(encoder.predict(musicVAE.data.y_orig))[1]
+    x_enc = np.squeeze(encoder.predict(musicVAE.data.y_orig))
 
     x_mean = np.mean(x_enc, axis=0)
     print("x_mean_shape: ", x_mean.shape)
@@ -218,29 +218,29 @@ class CustomCallback(tf.keras.callbacks.Callback):
 
 callback = CustomCallback()
 
-# if GeneralParams["play_only"]:
-#     # encoder= load_model('../model/encoder_model.h5')
-#     # # pre_encoder= load_model('../model/pre_encoder_model.h5', custom_objects={'VAE_B1': VAEparams["vae_b1"], 'vae_loss': vae_loss})
-#     write_dir= '../Testsamples/battle_theme/';
-#     if not os.path.exists(write_dir):
-#         os.makedirs(write_dir)
+if GeneralParams["play_only"]:
+    # encoder= load_model('../model/encoder_model.h5')
+    # # pre_encoder= load_model('../model/pre_encoder_model.h5', custom_objects={'VAE_B1': VAEparams["vae_b1"], 'vae_loss': vae_loss})
+    write_dir= '../Testsamples/battle_theme/';
+    if not os.path.exists(write_dir):
+        os.makedirs(write_dir)
 
 
-#     make_rand_songs_normalized(write_dir + '/', rand_vecs, 0.6)
-# elif GeneralParams["createTestingValues"]:
-#     write_dir= '../evaluation_samples/battle_theme';
-#     testresults= make_rand_songs_normalized(write_dir + '/', rand_vecs, 0.25, True)
+    make_rand_songs_normalized(write_dir + '/', rand_vecs, 0.25)
+elif GeneralParams["createTestingValues"]:
+    write_dir= '../evaluation/evaluation_samples/battle_theme';
+    testresults= make_rand_songs_normalized(write_dir + '/', rand_vecs, 0.25, True)
 
-#     np.save('../evaluation_sets/battle_theme/testsamples.npy', testresults)
-# else:
-#     print("train")
-#     model.fit(
-#         x=musicVAE.y_train,
-#         y=musicVAE.y_train,
-#         epochs=VAEparams["epochs"],
-#         batch_size=VAEparams["batch_size"],
-#         callbacks=[callback],
-#     )
+    np.save('../evaluation/evaluation_sets/battle_theme/testsamples.npy', testresults)
+else:
+    print("train")
+    model.fit(
+        x=musicVAE.y_train,
+        y=musicVAE.y_train,
+        epochs=VAEparams["epochs"],
+        batch_size=VAEparams["batch_size"],
+        callbacks=[callback],
+    )
 
 
 # for i in range(10):
@@ -248,32 +248,32 @@ callback = CustomCallback()
 #     util.samples_to_pics('../samples/' + 'test' + str(i) , musicVAE.y_train[i])
 #     midi.samples_to_midi(musicVAE.y_train[i], '../samples/testtest' + str(i) +'.mid', 96)
 
-model_log_dir = os.path.join(GeneralParams["log_dir"], GeneralParams["model_name"])
+# model_log_dir = os.path.join(GeneralParams["log_dir"], GeneralParams["model_name"])
 
-tb_callback = TensorBoard(
-    log_dir=model_log_dir,
-    histogram_freq=1,
-    write_graph=True
-)
+# tb_callback = TensorBoard(
+#     log_dir=model_log_dir,
+#     histogram_freq=1,
+#     write_graph=True
+# )
 
-model.fit(
-    x=musicVAE.y_train,
-    y=musicVAE.y_train,
-    epochs=VAEparams["epochs"],
-    batch_size=VAEparams["batch_size"],
-    callbacks=[tb_callback],
-)
+# model.fit(
+#     x=musicVAE.y_train,
+#     y=musicVAE.y_train,
+#     epochs=VAEparams["epochs"],
+#     batch_size=VAEparams["batch_size"],
+#     callbacks=[tb_callback],
+# )
 
-scores= model.get_metrics()
+# scores= model.get_metrics()
 
-with open("../parameter_tuning/"+ GeneralParams["model_name"] +".txt", 'w') as f:
-    f.write("Model1" + "\n\n")
-    for key in VAEparams:
-        f.write( key + ": " + str(VAEparams[key]) + " - ")
+# with open("../parameter_tuning/"+ GeneralParams["model_name"] +".txt", 'w') as f:
+#     f.write("Model1" + "\n\n")
+#     for key in VAEparams:
+#         f.write( key + ": " + str(VAEparams[key]) + " - ")
     
-    f.write("Model1" + "\n")
-    for key in scores:
-        f.write( key + ": " + str(scores[key]) + " - ")
+#     f.write("Model1" + "\n")
+#     for key in scores:
+#         f.write( key + ": " + str(scores[key]) + " - ")
 
 
 
