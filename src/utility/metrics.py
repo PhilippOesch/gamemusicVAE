@@ -211,16 +211,16 @@ def tonal_distance(samples1, samples2, ignore_treshhold, thresh= 0.5):
 
     return hcdf_results, np.sum(hcdf_results)/ t_c_samples1.shape[0], under_thresh_counter
 
-def drum_pattern(samples, thresh= 0.5):
+def drum_pattern(sample, thresh= 0.5):
     notes_counter= 0;
     dp_notes_counter= 0;
-    for z in range(samples.shape[0]):
-        for y in range(samples.shape[1]):
-            for x in range(samples.shape[2]):
-                if y% 6== 0 and samples[z, y, x]> thresh:
+    for z in range(sample.shape[0]):
+        for y in range(sample.shape[1]):
+            for x in range(sample.shape[2]):
+                if y% 6== 0 and sample[z, y, x]> thresh:
                     dp_notes_counter+= 1
                     notes_counter+= 1
-                elif samples[z, y, x]> thresh:
+                elif sample[z, y, x]> thresh:
                     notes_counter+= 1
 
-    return dp_notes_counter/ notes_counter
+    return dp_notes_counter, notes_counter

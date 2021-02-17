@@ -7,73 +7,78 @@ samples_per_measure = 96
 
 
 def midi_to_samples(fname):
-    has_time_sig= False
-    flag_warning= False
+    has_time_sig = False
+    flag_warning = False
     mid = MidiFile(fname)
-    ticks_per_beat= mid.ticks_per_beat
-    ticks_per_measure = 4* ticks_per_beat
+    ticks_per_beat = mid.ticks_per_beat
+    ticks_per_measure = 4 * ticks_per_beat
 
     for i, track in enumerate(mid.tracks):
         for msg in track:
             if msg.type == 'time_signature':
-                new_tpm= msg.numerator* ticks_per_beat * 4/ msg.denominator
+                new_tpm = msg.numerator * ticks_per_beat * 4 / msg.denominator
                 if has_time_sig and new_tpm != ticks_per_measure:
-                    flag_warning= True
-                ticks_per_measure= new_tpm
-                has_time_sig= True
+                    flag_warning = True
+                ticks_per_measure = new_tpm
+                has_time_sig = True
     if flag_warning:
-        print ("  ^^^^^^ WARNING ^^^^^^")
-        print ("    " + fname)
-        print ("    Detected multiple distinct time signatures.")
-        print ("  ^^^^^^ WARNING ^^^^^^")
+        print("  ^^^^^^ WARNING ^^^^^^")
+        print("    " + fname)
+        print("    Detected multiple distinct time signatures.")
+        print("  ^^^^^^ WARNING ^^^^^^")
         return []
 
     all_notes = {}
     for i, track in enumerate(mid.tracks):
-        abs_time= 0
+        abs_time = 0
         for msg in track:
             abs_time += msg.time
             if msg.type == 'note_on' or msg.type == 'note_off':
-                note = msg.note - (128- num_notes)/ 2
+                note = msg.note - (128 - num_notes) / 2
                 if msg.type == 'note_on':
                     if msg.velocity == 0:
                         continue
                     assert(note >= 0 and note < num_notes)
                     if note not in all_notes:
-                        all_notes[note]= []
+                        all_notes[note] = []
                     else:
-                        single_note= all_notes[note][-1]
+                        single_note = all_notes[note][-1]
                         if len(single_note) == 1:
                             single_note.append(single_note[0] + 1)
-                    all_notes[note].append([abs_time * samples_per_measure / ticks_per_measure])
+                    all_notes[note].append(
+                        [abs_time * samples_per_measure / ticks_per_measure])
                 elif msg.type == 'note_off':
                     # if not all_notes.get(note)== None:
-                        if len(all_notes[note][-1]) != 1:
-                            continue
-                        all_notes[note][-1].append(abs_time* samples_per_measure/ ticks_per_measure)
+                    if len(all_notes[note][-1]) != 1:
+                        continue
+                    all_notes[note][-1].append(abs_time *
+                                               samples_per_measure / ticks_per_measure)
 
+    
     for note in all_notes:
         for start_end in all_notes[note]:
-            if len(start_end)== 1:
+            if len(start_end) == 1:
                 start_end.append(start_end[0] + 1)
 
     # print (all_notes)
-    samples= []
+    samples = []
     for note in all_notes:
         for start, end in all_notes[note]:
             sample_ix = int(start / samples_per_measure)
-            while len(samples)<= sample_ix:
-                samples.append(np.zeros((samples_per_measure, num_notes), dtype= np.uint8))
-            sample= samples[sample_ix]
-            start_ix= int(start - sample_ix* samples_per_measure)
+            while len(samples) <= sample_ix:
+                samples.append(
+                    np.zeros((samples_per_measure, num_notes), dtype=np.uint8))
+            sample = samples[sample_ix]
+            start_ix = int(start - sample_ix * samples_per_measure)
             if False:
-                end_ix= min(end- sample_ix * samples_per_measure, samples_per_measure)
+                end_ix = min(end - sample_ix * samples_per_measure,
+                             samples_per_measure)
                 while start_ix < end_ix:
-                    sample[start_ix, int(note)]= 1
+                    sample[start_ix, int(note)] = 1
                     start_ix += 1
             else:
-                sample[start_ix, int(note)]= 1
-    
+                sample[start_ix, int(note)] = 1
+
     return samples
 
 

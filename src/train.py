@@ -218,29 +218,29 @@ class CustomCallback(tf.keras.callbacks.Callback):
 
 callback = CustomCallback()
 
-if GeneralParams["play_only"]:
-    # encoder= load_model('../model/encoder_model.h5')
-    # # pre_encoder= load_model('../model/pre_encoder_model.h5', custom_objects={'VAE_B1': VAEparams["vae_b1"], 'vae_loss': vae_loss})
-    write_dir= '../Testsamples/battle_theme/';
-    if not os.path.exists(write_dir):
-        os.makedirs(write_dir)
+# if GeneralParams["play_only"]:
+#     # encoder= load_model('../model/encoder_model.h5')
+#     # # pre_encoder= load_model('../model/pre_encoder_model.h5', custom_objects={'VAE_B1': VAEparams["vae_b1"], 'vae_loss': vae_loss})
+#     write_dir= '../Testsamples/battle_theme/';
+#     if not os.path.exists(write_dir):
+#         os.makedirs(write_dir)
 
 
-    make_rand_songs_normalized(write_dir + '/', rand_vecs, 0.25)
-elif GeneralParams["createTestingValues"]:
-    write_dir= '../evaluation/evaluation_samples/battle_theme';
-    testresults= make_rand_songs_normalized(write_dir + '/', rand_vecs, 0.25, True)
+#     make_rand_songs_normalized(write_dir + '/', rand_vecs, 0.25)
+# elif GeneralParams["createTestingValues"]:
+#     write_dir= '../evaluation/evaluation_samples/battle_theme';
+#     testresults= make_rand_songs_normalized(write_dir + '/', rand_vecs, 0.25, True)
 
-    np.save('../evaluation/evaluation_sets/battle_theme/testsamples.npy', testresults)
-else:
-    print("train")
-    model.fit(
-        x=musicVAE.y_train,
-        y=musicVAE.y_train,
-        epochs=VAEparams["epochs"],
-        batch_size=VAEparams["batch_size"],
-        callbacks=[callback],
-    )
+#     np.save('../evaluation/evaluation_sets/battle_theme/testsamples.npy', testresults)
+# else:
+#     print("train")
+#     model.fit(
+#         x=musicVAE.y_train,
+#         y=musicVAE.y_train,
+#         epochs=VAEparams["epochs"],
+#         batch_size=VAEparams["batch_size"],
+#         callbacks=[callback],
+#     )
 
 model.summary()
 
@@ -277,5 +277,6 @@ model.summary()
 #     for key in scores:
 #         f.write( key + ": " + str(scores[key]) + " - ")
 
-
+print(musicVAE.y_train.shape)
+print(musicVAE.y_shape)
 

@@ -27,10 +27,13 @@ similarity_threshhold = 0.01
 def evaluate_dp(data_set, thresh):
     print("Evaluating rate of drum pattern rhythms in tracks")
     dp_sum = 0
+    notes_sum= 0
     for song in data_set:
-        dp_sum += metrics.drum_pattern(song, thresh)
+        dp_notes, notes = metrics.drum_pattern(song, thresh)
+        dp_sum+= dp_notes
+        notes_sum+= notes
 
-    return dp_sum / data_set.shape[0]
+    return dp_notes / notes_sum
 
 
 def evaluate_eb(data_set, thresh):
