@@ -14,24 +14,24 @@ from tensorflow.keras.backend import learning_phase
 from params import *
 
 vae_b1 = GeneralParams["vae_b1"]
-vae_b2 = GeneralParams["vae_b2"]
+beta = GeneralParams["vae_b2"]
 data = Data(use_embedding=False)
 x_train, y_train, x_shape, y_shape = data.get_train_set()
-z_log_sigma_sq = 0.0
-z_mean = 0.0
+sigma = 0.0
+mu = 0.0
 
 
 def vae_loss(x, x_decoded_mean):
-    xent_loss = binary_crossentropy(x, x_decoded_mean)
-    kl_loss = vae_b2 * K.mean(1 + z_log_sigma_sq -
-                              K.square(z_mean) - K.exp(z_log_sigma_sq), axis=None)
-    return xent_loss - kl_loss
+    rec_loss = binary_crossentropy(x, x_decoded_mean)
+    kld_loss =  -0.5 * K.mean(1 + sigma -
+                              K.square(mu) - K.exp(sigma), axis=None)
+    return rec_loss + (beta * kld_loss)
 
 
 def vae_sampling(args):
-    z_mean, z_log_sigma_sq = args
-    epsilon = K.random_normal(shape=K.shape(z_mean), mean=0.0, stddev=vae_b1)
-    return z_mean + K.exp(z_log_sigma_sq * 0.5) * epsilon
+    mu, sigma = args
+    epsilon = K.random_normal(shape=K.shape(mu), mean=0.0, stddev=vae_b1)
+    return mu + K.exp(sigma * 0.5) * epsilon
 
 
 def get_decoder(param_size, bn_m, activation, do_rate, max_length, use_batchnorm):
@@ -70,12 +70,17 @@ def get_decoder(param_size, bn_m, activation, do_rate, max_length, use_batchnorm
         plot_model(model, to_file='../model/encoder_model.png',
                    show_shapes=True)
 
+    plot_model(model, to_file='../model/decoder_model.png',
+               show_shapes=True)
+
+
     return model
 
 
 def get_encoder(param_size, activation, ignore_encoder_layer2):
     x_in = Input(shape=y_shape[1:])
     x = Reshape((y_shape[1], -1))(x_in)
+    print(x.shape)
 
     x = TimeDistributed(Dense(2000, activation=activation))(x)
 
@@ -86,14 +91,14 @@ def get_encoder(param_size, activation, ignore_encoder_layer2):
 
     x = Dense(1600, activation=activation)(x)
 
-    z_mean = Dense(param_size)(x)
-    z_log_sigma_sq = Dense(param_size)(x)
-    x_out = Lambda(vae_sampling, output_shape=(param_size,),
-                   name='pre_encoder')([z_mean, z_log_sigma_sq])
+    mu = Dense(param_size)(x)
+    sigma = Dense(param_size)(x)
+    z= Lambda(vae_sampling, output_shape=(param_size,),
+                   name='pre_encoder')([mu, sigma])
 
-    model = Model(x_in, x_out)
+    model = Model(x_in, [mu, sigma, z])
 
-    plot_model(model, to_file='../model/pre_encoder_model.png',
+    plot_model(model, to_file='../model/encoder_model.png',
                show_shapes=True)
 
     return model
@@ -106,7 +111,7 @@ def build_full_model(optimizer, param_size, activation_str, max_length, bn_m, do
                           activation=activation_str, do_rate=do_rate, max_length=max_length, use_batchnorm= use_batchnorm)
 
     x_in = encoder.input
-    x_out = decoder(encoder.output)
+    x_out = decoder(encoder.output[2])
     model = Model(x_in, x_out)
     model.compile(optimizer=optimizer(lr=lr), loss=vae_loss)
 

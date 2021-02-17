@@ -94,7 +94,7 @@ def make_rand_songs(write_dir, rand_vecs, thresh= 0.25):
 
 def make_rand_songs_normalized(write_dir, rand_vecs, thresh= 0.25, getResult= False):
 
-    x_enc = np.squeeze(encoder.predict(musicVAE.data.y_orig))
+    x_enc = np.squeeze(encoder.predict(musicVAE.data.y_orig)[2])
 
     x_mean = np.mean(x_enc, axis=0)
     print("x_mean_shape: ", x_mean.shape)
@@ -241,6 +241,8 @@ else:
         batch_size=VAEparams["batch_size"],
         callbacks=[callback],
     )
+
+model.summary()
 
 
 # for i in range(10):
