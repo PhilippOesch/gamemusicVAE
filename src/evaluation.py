@@ -33,11 +33,11 @@ def evaluate_dp(data_set, thresh):
     return dp_sum / data_set.shape[0]
 
 
-def evaluate_eb(data_set):
+def evaluate_eb(data_set, thresh):
     print("Evaluating Rate of Empty Bars")
     eb_sum = 0
     for song in data_set:
-        eb_value, _ = metrics.empty_bars(song)
+        eb_value, _ = metrics.empty_bars(song, thresh)
         eb_sum += eb_value
 
     return eb_sum / (data_set.shape[0] * data_set.shape[1])
