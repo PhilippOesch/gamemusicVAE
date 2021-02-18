@@ -2,9 +2,11 @@ import warnings
 import numpy as np
 from scipy import signal
 import matplotlib.pyplot as plt
+from utility.mode_collapse import*
 
 num_notes = 88
 min_tresh= 0.01
+similarity_threshhold = 0.01
 
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
@@ -148,13 +150,13 @@ def get_upc(samples, thresh=0.25):
     return upcs, average_upcs
 
 
-def polyphonicity(samples, relative_to_notes=True, thresh=0.25):
+def polyphonicity(sample, thresh=0.25):
     adjusted_samples = np.zeros(
-        (samples.shape[0], samples.shape[1], samples.shape[2]), dtype=np.uint8)
-    for z in range(samples.shape[0]):
-        for y in range(samples.shape[1]):
-            for x in range(samples.shape[2]):
-                if samples[z, y, x] > thresh:
+        (sample.shape[0], sample.shape[1], sample.shape[2]), dtype=np.uint8)
+    for z in range(sample.shape[0]):
+        for y in range(sample.shape[1]):
+            for x in range(sample.shape[2]):
+                if sample[z, y, x] > thresh:
                     adjusted_samples[z, y, x] = 1
 
     count_frames_note = 0
@@ -167,12 +169,7 @@ def polyphonicity(samples, relative_to_notes=True, thresh=0.25):
             if np.sum(adjusted_samples[z, y]) > 1:
                 count_frames_multiple_notes += 1
 
-    if relative_to_notes:
-        ratio = count_frames_multiple_notes / count_frames_note
-    else:
-        ratio = count_frames_multiple_notes / \
-            (samples.shape[0] * samples.shape[1])
-    return ratio
+    return count_frames_multiple_notes, count_frames_note
 
 
 def get_transformation_matrix(l):
@@ -211,16 +208,113 @@ def tonal_distance(samples1, samples2, ignore_treshhold, thresh= 0.5):
 
     return hcdf_results, np.sum(hcdf_results)/ t_c_samples1.shape[0], under_thresh_counter
 
-def drum_pattern(sample, thresh= 0.5):
+def drum_pattern(samples, thresh= 0.5):
     notes_counter= 0;
     dp_notes_counter= 0;
-    for z in range(sample.shape[0]):
-        for y in range(sample.shape[1]):
-            for x in range(sample.shape[2]):
-                if y% 6== 0 and sample[z, y, x]> thresh:
+    for z in range(samples.shape[0]):
+        for y in range(samples.shape[1]):
+            for x in range(samples.shape[2]):
+                if y% 6== 0 and samples[z, y, x]> thresh:
                     dp_notes_counter+= 1
                     notes_counter+= 1
-                elif sample[z, y, x]> thresh:
+                elif samples[z, y, x]> thresh:
                     notes_counter+= 1
 
-    return dp_notes_counter, notes_counter
+    return dp_notes_counter/ notes_counter
+
+def evaluate_dp(data_set, thresh):
+    print("Evaluating rate of drum pattern rhythms in tracks")
+    dp_sum = 0
+    notes_sum= 0
+    for song in data_set:
+        dp_notes, notes = drum_pattern(song, thresh)
+        dp_sum+= dp_notes
+        notes_sum+= notes
+
+    return dp_notes / notes_sum
+
+
+def evaluate_eb(data_set, thresh):
+    print("Evaluating Rate of Empty Bars")
+    eb_sum = 0
+    for song in data_set:
+        eb_value, _ = empty_bars(song, thresh)
+        eb_sum += eb_value
+
+    return eb_sum / (data_set.shape[0] * data_set.shape[1])
+
+
+def evaluate_polyphonicity(data_set, thresh):
+    print("Evaluating Polyphonicity of tracks")
+    poly_sum = 0
+    notes_step_sum = 0
+    for song in data_set:
+        poly, notes = polyphonicity(song, True, thresh)
+        poly_sum+= poly
+        notes_step_sum+= notes
+
+    return poly_sum / notes_step_sum
+
+
+def evaluate_tonal_distance(data_set1, data_set2=[], thresh=0.25):
+    print("Evaluating Tonal Distance between tracks")
+    missing_sets = data_set1.copy()
+    print(missing_sets.shape)
+    total_sum = 0
+    comparison_counter = 0
+    lowestTD = 1
+    under_thresh_counter= 0
+    try:
+        for value in data_set1:
+            if not missing_sets.shape[0] == 0:
+                if len(data_set2) == 0:
+                    for compare_value in missing_sets[1:]:
+                        print("Comparison Counter: ", comparison_counter)
+                        comparison_counter += 1
+                        _, comparisson_td, under_thresh = tonal_distance(
+                            value, compare_value, ignore_treshhold=False, thresh=thresh)
+                        if comparisson_td < similarity_threshhold:
+                            raise ModeCollapse
+                        total_sum += comparisson_td
+                        if comparisson_td < lowestTD:
+                            lowestTD = comparisson_td
+                        under_thresh_counter+= under_thresh
+                    missing_sets = np.delete(missing_sets, value, axis=0)
+                else:
+                    for compare_value in data_set2:
+                        print("Comparison Counter: ", comparison_counter)
+                        comparison_counter += 1
+                        _, comparisson_td, under_thresh = tonal_distance(
+                            value, compare_value, ignore_treshhold=False, thresh=thresh)
+                        print(comparisson_td)
+                        if comparisson_td < similarity_threshhold:
+                            raise ModeCollapse
+                        total_sum += comparisson_td
+                        if comparisson_td < lowestTD:
+                            lowestTD = comparisson_td
+                        under_thresh_counter+= under_thresh
+        print(comparison_counter)
+    except ModeCollapse:
+        print("Mode Collapse Exception was thrown. The samples are too similar")
+
+    return total_sum / comparison_counter, lowestTD, under_thresh_counter
+
+
+def evaluate_upc_average(data_set, thresh):
+    print("Evaluate Average Number of pitch classes")
+    total_upc = 0
+    for song in data_set:
+        _, average_upcs = get_upc(song, thresh)
+        total_upc += average_upcs
+
+    return total_upc / data_set.shape[0]
+
+
+def evaluate_notes_per_song(data_set, thresh):
+    print("Evaluate Notes per Song")
+    total_note_counter = 0
+
+    for song in data_set:
+        total_note_counter += get_note_count(song, thresh)
+
+    return total_note_counter / data_set.shape[0]
