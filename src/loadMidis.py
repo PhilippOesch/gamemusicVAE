@@ -12,6 +12,9 @@ print("Loading Songs...")
 if not os.path.exists('../model'):
     os.makedirs('../model')
 
+if not os.path.exists('../model/datasets'):
+    os.makedirs('../model/datasets')
+
 for root, subdirs, files in os.walk(directory):
     for file in files:
         path = root + "\\" + file
@@ -43,6 +46,6 @@ all_samples = np.array(all_samples, dtype=np.uint8)
 all_lens = np.array(all_lens, dtype=np.uint32)
 # np.save('../model/samples.npy', all_samples)
 # np.save('../model/lengths.npy', all_lens)
-np.save('../model/samples.npy', all_samples)
-np.save('../model/lengths.npy', all_lens)
+np.save('../model/datasets/battle_samples.npy', all_samples)
+np.save('../model/datasets/battle_lengths.npy', all_lens)
 print("Done")

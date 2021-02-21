@@ -7,3 +7,4 @@
 /model/
 /src/__pycache__
 /evaluation_sets
+/tensorboard

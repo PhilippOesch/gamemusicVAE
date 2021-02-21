@@ -101,8 +101,7 @@ def get_t_c_samples(samples):
 
     for z in range(samples.shape[0]):
         for y in range(samples.shape[1]):
-            y_d6 = [get_transformation_matrix(
-                x) * samples[z, y, x] for x in range(samples.shape[2])]
+            y_d6 = [get_transformation_matrix(x) * samples[z, y, x] for x in range(samples.shape[2])]
             sum_y = np.sum(y_d6, axis=0)
             # print(sum_y)
             l_norm = np.linalg.norm(samples[z, y])
@@ -198,15 +197,12 @@ def tonal_distance(samples1, samples2, ignore_treshhold, thresh= 0.5):
     t_c_samples2 = get_t_c_samples(samples= eq_t_samples2)
     # print(t_c_samples.shape)
 
-    under_thresh_counter= 0
-    hcdf_results = []
+    e_d_results = []
     for i in range(t_c_samples1.shape[0]):
         epsilon = np.sqrt(np.sum((t_c_samples1[i] - t_c_samples2[i])**2))
-        if epsilon< min_tresh:
-            under_thresh_counter+= 1
-        hcdf_results.append(epsilon)
+        e_d_results.append(epsilon)
 
-    return hcdf_results, np.sum(hcdf_results)/ t_c_samples1.shape[0], under_thresh_counter
+    return np.sum(e_d_results)/ len(e_d_results)
 
 def drum_pattern(samples, thresh= 0.5):
     notes_counter= 0;
@@ -263,7 +259,6 @@ def evaluate_tonal_distance(data_set1, data_set2=[], thresh=0.25):
     total_sum = 0
     comparison_counter = 0
     lowestTD = 1
-    under_thresh_counter= 0
     try:
         for value in data_set1:
             if not missing_sets.shape[0] == 0:
@@ -271,20 +266,19 @@ def evaluate_tonal_distance(data_set1, data_set2=[], thresh=0.25):
                     for compare_value in missing_sets[1:]:
                         print("Comparison Counter: ", comparison_counter)
                         comparison_counter += 1
-                        _, comparisson_td, under_thresh = tonal_distance(
+                        _, comparisson_td = tonal_distance(
                             value, compare_value, ignore_treshhold=False, thresh=thresh)
                         if comparisson_td < similarity_threshhold:
                             raise ModeCollapse
                         total_sum += comparisson_td
                         if comparisson_td < lowestTD:
                             lowestTD = comparisson_td
-                        under_thresh_counter+= under_thresh
                     missing_sets = np.delete(missing_sets, value, axis=0)
                 else:
                     for compare_value in data_set2:
                         print("Comparison Counter: ", comparison_counter)
                         comparison_counter += 1
-                        _, comparisson_td, under_thresh = tonal_distance(
+                        _, comparisson_td = tonal_distance(
                             value, compare_value, ignore_treshhold=False, thresh=thresh)
                         print(comparisson_td)
                         if comparisson_td < similarity_threshhold:
@@ -292,12 +286,11 @@ def evaluate_tonal_distance(data_set1, data_set2=[], thresh=0.25):
                         total_sum += comparisson_td
                         if comparisson_td < lowestTD:
                             lowestTD = comparisson_td
-                        under_thresh_counter+= under_thresh
         print(comparison_counter)
     except ModeCollapse:
         print("Mode Collapse Exception was thrown. The samples are too similar")
 
-    return total_sum / comparison_counter, lowestTD, under_thresh_counter
+    return total_sum / comparison_counter, lowestTD
 
 
 def evaluate_upc_average(data_set, thresh):
