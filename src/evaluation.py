@@ -21,6 +21,15 @@ metric_lables = [
     "average Song Note count"
 ]
 
+metric_lables_no_tonal_distance = [
+    "Empty Bars",
+    "Drum Pattern",
+    "Polyphonicity",
+    "Average amount of different pitch classes",
+    "average Song Note count"
+]
+
+
 
 def write_evaluation(file_name, modelname, title, metric_labels, values):
     write_dir = '../evaluation_results/' + modelname + '/'

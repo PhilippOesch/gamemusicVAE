@@ -35,17 +35,15 @@ VAEparams = {
 
 GeneralParams= {
     "vae_b2": 10,
-    "model_name": "model_battle_1",
+    "model_name": "battle_final_1",
     "write_history": True,
     "num_rand_songs": 10,
     "use_batchnorm": False,
     "play_only": False,
     "history_dir": '../History/battle_final_1/',
-    "log_dir": '../tensorboard/final',
     "continue_training": False,
     "createTestingValues": False,
     "dataset_name": "battle",
     "num_timesteps": 96,
     "num_notes": 88,
-    "log_in_tensorboard": True
 }

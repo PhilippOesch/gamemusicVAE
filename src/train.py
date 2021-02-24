@@ -15,6 +15,7 @@ from sklearn.model_selection import GridSearchCV, ParameterGrid
 from tensorflow.keras.wrappers.scikit_learn import KerasClassifier
 import os
 import utility.util as util
+tf.keras.backend.clear_session()
 
 from params import VAEparams, GeneralParams
 import network.musicVAE as musicVAE
@@ -37,8 +38,6 @@ if not os.path.exists('../Testsamples'):
 
 model = musicVAE.build_full_model(VAEparams["optimizer"], GeneralParams["vae_b2"], VAEparams["lr"])
 model.built = True
-encoder = musicVAE.encoder
-decoder = musicVAE.decoder
 # model.build((None, musicVAE.y_shape[1],
 #             musicVAE.y_shape[2], musicVAE.y_shape[3]))
 if GeneralParams["play_only"] or GeneralParams["continue_training"] or GeneralParams["createTestingValues"]:
@@ -47,25 +46,19 @@ if GeneralParams["play_only"] or GeneralParams["continue_training"] or GeneralPa
     else:
         model.load_weights('../model/model_weights.h5')
 
+encoder = musicVAE.encoder
+decoder = musicVAE.decoder
+
 y_test_song = np.copy(musicVAE.y_train[0])
 y_test_song = np.reshape(y_test_song, (1, y_test_song.shape[0], y_test_song.shape[1], y_test_song.shape[2]))
 print(y_test_song.shape)
+
 
 if GeneralParams["write_history"]:
     midi.samples_to_midi(y_test_song[0], GeneralParams["history_dir"]+'gt.mid', 16)
 else:
     midi.samples_to_midi(y_test_song[0], '../model/gt.mid', 16)
 
-
-
-def print_model_params(write_dir):
-    with open(write_dir + GeneralParams["model_name"] + ".txt", 'w') as f:
-        f.write("Model1" + "\n\n")
-        for key in VAEparams:
-            f.write(key + ": " + str(VAEparams[key]) + " - ")
-
-        f.write("\nbeta: " + str(GeneralParams["vae_b2"]) + " - \n\n")
-        f.write(str(GeneralParams["model_name"]))
 
 def make_rand_songs(write_dir, thresh=0.25, song_num= 10):
     songs= decoder.predict(np.random.normal(0,1, size=(song_num, VAEparams["param_size"])))
@@ -201,14 +194,6 @@ class CustomCallback(tf.keras.callbacks.Callback):
 
 callback = CustomCallback()
 
-model_log_dir = os.path.join(
-    GeneralParams["log_dir"], GeneralParams["model_name"])
-
-tb_callback = TensorBoard(
-    log_dir=model_log_dir,
-    histogram_freq=1,
-    write_graph=True
-)
 
 if GeneralParams["play_only"]:
     # encoder= load_model('../model/encoder_model.h5')
@@ -217,36 +202,45 @@ if GeneralParams["play_only"]:
     if not os.path.exists(write_dir):
         os.makedirs(write_dir)
 
-    make_rand_songs_centered(write_dir, thresh=0.25, song_num= 10)
+    make_rand_songs_centered(write_dir, thresh=0.25, song_num= GeneralParams["num_rand_songs"])
     # make_rand_songs(write_dir, thresh=0.25, song_num= 10)
     # make_rand_songs_normalized(write_dir + '/', rand_vecs, 0.25)
 elif GeneralParams["createTestingValues"]:
-    write_dir= '../evaluation/evaluation_samples/battle_theme';
+    write_dir= '../evaluation/evaluation_samples/battle_theme'+ GeneralParams["model_name"];
+    if not os.path.exists(write_dir):
+        os.makedirs(write_dir)
     # testresults= make_rand_songs_normalized(write_dir + '/', rand_vecs, 0.25, True)
-    testresults= make_rand_songs(write_dir + '/', 0.25, GeneralParams["num_rand_songs"])
+    testresults= make_rand_songs_centered(write_dir, thresh=0.25, song_num= GeneralParams["num_rand_songs"])
 
-    np.save('../evaluation/evaluation_sets/battle_theme/testsamples.npy', testresults)
+    np.save('../evaluation/evaluation_sets/battle_theme/'+ GeneralParams["model_name"] +'_samples.npy', testresults)
 else:
-    print("train")
-    if GeneralParams["log_in_tensorboard"]:
-        model.fit(
-            x=musicVAE.y_train,
-            y=musicVAE.y_train,
-            epochs=VAEparams["epochs"],
-            batch_size=VAEparams["batch_size"],
-            callbacks=[callback, tb_callback],
-        )
-    else:
-        model.fit(
-            x=musicVAE.y_train,
-            y=musicVAE.y_train,
-            epochs=VAEparams["epochs"],
-            batch_size=VAEparams["batch_size"],
-            callbacks=[callback],
-        )
+    model.fit(
+        x=musicVAE.y_train,
+        y=musicVAE.y_train,
+        epochs=VAEparams["epochs"],
+        batch_size=VAEparams["batch_size"],
+        callbacks=[callback],
+    )
 
-model.summary()
+    model.summary()
+    score= model.get_metrics()
+
+    print(score)
+
+
+def print_model_params(write_dir):
+    with open(write_dir + GeneralParams["model_name"] + ".txt", 'w') as f:
+        f.write("Model1" + "\n\n")
+        for key in VAEparams:
+            f.write(key + ": " + str(VAEparams[key]) + " - ")
+
+        f.write("\nbeta: " + str(GeneralParams["vae_b2"]) + " - \n\n")
+        f.write(str(GeneralParams["model_name"])+ "\n\n")
+
+        f.write("Loss: "+ str(score[0])+ "\n")
+        f.write("Reconstruction-Loss: "+ str(score[1])+ "\n")
+        f.write("KL-Divergenz: "+ str(score[2])+ "\n\n")
+
 if GeneralParams["write_history"]:
     write_dir = GeneralParams["history_dir"]
     print_model_params(write_dir)
-
