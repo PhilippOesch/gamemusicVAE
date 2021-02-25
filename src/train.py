@@ -112,16 +112,19 @@ def print_distribution(write_dir):
 def make_rand_songs_centered(write_dir, thresh=0.25, song_num= 10):
     songs= decoder.predict(np.random.normal(0,1, size=(song_num, VAEparams["param_size"])))
 
+    results= []
+
     for i in range(song_num):
         song= songs[i].squeeze()
         song= np.where(song >= thresh, 1, 0)
         print(song.shape)
         song= util.centered_transposed(song)
         song= np.array(song)
+        results.append(song)
         print(song.shape)
         midi.samples_to_midi(song, write_dir +
                              'rand' + str(i) + '.mid', 16, thresh)
-    return np.array(songs)
+    return np.array(results)
 
 
 def plotScores(scores, fname, on_top=True):
@@ -198,7 +201,7 @@ callback = CustomCallback()
 if GeneralParams["play_only"]:
     # encoder= load_model('../model/encoder_model.h5')
     # # pre_encoder= load_model('../model/pre_encoder_model.h5', custom_objects={'VAE_B1': VAEparams["vae_b1"], 'vae_loss': vae_loss})
-    write_dir= '../Testsamples/battle_theme/';
+    write_dir= '../Testsamples/overworld_theme/';
     if not os.path.exists(write_dir):
         os.makedirs(write_dir)
 
@@ -206,7 +209,7 @@ if GeneralParams["play_only"]:
     # make_rand_songs(write_dir, thresh=0.25, song_num= 10)
     # make_rand_songs_normalized(write_dir + '/', rand_vecs, 0.25)
 elif GeneralParams["createTestingValues"]:
-    write_dir= '../evaluation/evaluation_samples/battle_theme'+ GeneralParams["model_name"];
+    write_dir= '../evaluation/evaluation_samples/' + GeneralParams["model_name"]+ "/";
     if not os.path.exists(write_dir):
         os.makedirs(write_dir)
     # testresults= make_rand_songs_normalized(write_dir + '/', rand_vecs, 0.25, True)
@@ -241,6 +244,6 @@ def print_model_params(write_dir):
         f.write("Reconstruction-Loss: "+ str(score[1])+ "\n")
         f.write("KL-Divergenz: "+ str(score[2])+ "\n\n")
 
-if GeneralParams["write_history"]:
+if GeneralParams["write_history"] and not GeneralParams["createTestingValues"] and not GeneralParams["play_only"]:
     write_dir = GeneralParams["history_dir"]
     print_model_params(write_dir)

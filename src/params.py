@@ -10,7 +10,7 @@ VAEparams = {
     "do_rate": 0.1,
     "lr": 0.00075,
     "epochs": 2000,
-    "batch_size": 200,
+    "batch_size": 128,
     "use_batchnorm": True,
     "dim1": 2048,
     "dim2": 256,
@@ -44,6 +44,7 @@ GeneralParams= {
     "continue_training": False,
     "createTestingValues": False,
     "dataset_name": "battle",
+    "log_dir": "../tensorboard/",
     "num_timesteps": 96,
     "num_notes": 88,
 }

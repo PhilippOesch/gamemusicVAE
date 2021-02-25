@@ -3,12 +3,44 @@ import numpy as np
 from scipy import signal
 import matplotlib.pyplot as plt
 from utility.mode_collapse import*
+import os
 
 num_notes = 88
 min_tresh= 0.01
 similarity_threshhold = 0.01
 
 warnings.filterwarnings("ignore", category=RuntimeWarning)
+
+
+def write_evaluation(file_name, modelname, title, metric_labels, values):
+    write_dir = '../evaluation_results/' + modelname + '/'
+    if not os.path.exists(write_dir):
+        os.makedirs(write_dir)
+
+    with open(write_dir + file_name, 'w') as f:
+        f.write(title + "\n\n")
+
+        for metric, value in zip(metric_labels, values):
+            f.write(metric + ": " + str(value) + "\n")
+
+
+def write_val_to_train_comparrison(file_name, title, dictionary, lowestTD):
+    write_dir = '../evaluation_results/'
+    if not os.path.exists(write_dir):
+        os.makedirs(write_dir)
+
+    with open(write_dir + file_name, 'w') as f:
+        f.write(title + "\n\n")
+
+        avarage = 0
+        for key in dictionary:
+            f.write(str(key) + ": " + str(dictionary[key]) + "\n")
+            avarage += dictionary[key]
+
+        avarage /= len(dictionary)
+
+        f.write("Avarage Tonal Distance: " + str(avarage) + "\n")
+        f.write("Lowest Tonal Distance between 2 Songs: " + str(lowestTD) + "\n")
 
 def get_qn(samples, thresh=0.25):
     note_counter = 0
@@ -216,7 +248,7 @@ def drum_pattern(samples, thresh= 0.5):
                 elif samples[z, y, x]> thresh:
                     notes_counter+= 1
 
-    return dp_notes_counter/ notes_counter
+    return dp_notes_counter, notes_counter 
 
 def evaluate_dp(data_set, thresh):
     print("Evaluating rate of drum pattern rhythms in tracks")
@@ -227,7 +259,7 @@ def evaluate_dp(data_set, thresh):
         dp_sum+= dp_notes
         notes_sum+= notes
 
-    return dp_notes / notes_sum
+    return dp_sum / notes_sum
 
 
 def evaluate_eb(data_set, thresh):
@@ -245,7 +277,7 @@ def evaluate_polyphonicity(data_set, thresh):
     poly_sum = 0
     notes_step_sum = 0
     for song in data_set:
-        poly, notes = polyphonicity(song, True, thresh)
+        poly, notes = polyphonicity(song, thresh)
         poly_sum+= poly
         notes_step_sum+= notes
 
@@ -266,7 +298,7 @@ def evaluate_tonal_distance(data_set1, data_set2=[], thresh=0.25):
                     for compare_value in missing_sets[1:]:
                         print("Comparison Counter: ", comparison_counter)
                         comparison_counter += 1
-                        _, comparisson_td = tonal_distance(
+                        comparisson_td = tonal_distance(
                             value, compare_value, ignore_treshhold=False, thresh=thresh)
                         if comparisson_td < similarity_threshhold:
                             raise ModeCollapse
@@ -278,7 +310,7 @@ def evaluate_tonal_distance(data_set1, data_set2=[], thresh=0.25):
                     for compare_value in data_set2:
                         print("Comparison Counter: ", comparison_counter)
                         comparison_counter += 1
-                        _, comparisson_td = tonal_distance(
+                        comparisson_td = tonal_distance(
                             value, compare_value, ignore_treshhold=False, thresh=thresh)
                         print(comparisson_td)
                         if comparisson_td < similarity_threshhold:

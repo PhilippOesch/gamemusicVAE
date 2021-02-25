@@ -4,7 +4,7 @@ import utility.util as util
 import numpy as np
 
 patterns = {}
-directory = "../sampleMidis/battlethemes"
+directory = "../sampleMidis/overworldTheme"
 all_samples = []
 song_num= 0
 print ("Loading Songs...")
@@ -35,5 +35,5 @@ for root, subdirs, files in os.walk(directory):
 
 all_samples = np.reshape(all_samples, (song_num, 16, 96, 88))
 print(all_samples.shape)
-np.save('../evaluation_sets/battle_theme/train_set_samples', all_samples)
+np.save('../evaluation/evaluation_sets/overworld_theme/train_set_samples', all_samples)
 print ("Done")

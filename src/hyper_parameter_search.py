@@ -30,10 +30,9 @@ score= []
 model_log_dir = os.path.join(
     GeneralParams["log_dir"], GeneralParams["model_name"])
 
-tb_callback0 = TensorBoard(
+tb_callback = TensorBoard(
     log_dir=model_log_dir,
-    histogram_freq=1,
-    write_graph=True
+    histogram_freq=1
 )
 
 
@@ -43,7 +42,7 @@ model.fit(
     y=musicVAE.y_train,
     epochs=VAEparams["epochs"],
     batch_size=VAEparams["batch_size"],
-    callbacks=[tb_callback0],
+    callbacks=[tb_callback],
 )
 score= model.get_metrics()
 print(score)
