@@ -88,11 +88,12 @@ lowest_td_result2= 1
 # Evaluation Train Set
 print("evaluating Train_Set1:")
 train_set_model1 = np.load(val_dir1 + '/train_set_samples.npy')
+print(train_set_model1.shape)
 random_idxs = np.random.choice(train_set_model1.shape[0], 100)
 train_set_model1_reduced= [ train_set_model1[random_idxs[i]] for i in range(random_idxs.shape[0])]
 train_set_model1_reduced= np.array(train_set_model1_reduced)
 print("Test_Set Shape: ", train_set_model1.shape)
-metrics.write_td_evaluation("battle_train_set_td.txt" ,model1name, "Battle Train Set Evaluation:", metrics.evaluate_tonal_distance(data_set1= train_set_model1_reduced, thresh= thresh))
+metrics.write_td_evaluation("battle_train_set_td.txt" ,model1name, "Battle Train Set Evaluation:", metrics.evaluate_tonal_distance(data_set1= train_set_model1[:100], thresh= thresh))
 # Evaluation AI-Result-set
 # print("evaluating AI_Results1")
 # val_set_model1 = np.load(val_dir1 + '/battle_final_1_samples.npy')
@@ -100,14 +101,14 @@ metrics.write_td_evaluation("battle_train_set_td.txt" ,model1name, "Battle Train
 # metrics.write_td_evaluation("battle_sample_set_td.txt" ,model1name, "Battle Sample Set Evaluation:", metrics.evaluate_tonal_distance(data_set1= val_set_model1, thresh= thresh))
 
 
-# # Evaluation Train Set
-# print("evaluating Train_Set2:")
-# train_set_model2 = np.load(val_dir2 + '/train_set_samples.npy')
-# random_idxs = np.random.choice(train_set_model2.shape[0], 100)
-# train_set_model2_reduced= [ train_set_model2[random_idxs[i]] for i in range(random_idxs.shape[0])]
-# train_set_model2_reduced= np.array(train_set_model2_reduced)
-# print("Test_Set Shape: ", train_set_model2.shape)
-# metrics.write_td_evaluation("overworld_train_set_td.txt" ,model1name, "Overworld Train Set Evaluation:", metrics.evaluate_tonal_distance(data_set1= train_set_model2_reduced, thresh= thresh))
+# Evaluation Train Set
+print("evaluating Train_Set2:")
+train_set_model2 = np.load(val_dir2 + '/train_set_samples.npy')
+random_idxs = np.random.choice(train_set_model2.shape[0], 100)
+train_set_model2_reduced= [ train_set_model2[random_idxs[i]] for i in range(random_idxs.shape[0])]
+train_set_model2_reduced= np.array(train_set_model2_reduced)
+print("Test_Set Shape: ", train_set_model2.shape)
+metrics.write_td_evaluation("overworld_train_set_td.txt" ,model1name, "Overworld Train Set Evaluation:", metrics.evaluate_tonal_distance(data_set1= train_set_model2[:100], thresh= thresh))
 
 
 # # Evaluation AI-Result-set
