@@ -47,7 +47,7 @@ model.fit(
 score= model.get_metrics()
 print(score)
 
-with open("../parameter_tuning/" + GeneralParams["model_name"] + ".txt", 'w') as f:
+with open("../parameter_tuning/model_scores/" + GeneralParams["model_name"] + ".txt", 'w') as f:
     f.write("Model1" + "\n\n")
     for key in VAEparams:
         f.write(key + ": " + str(VAEparams[key]) + " - ")
