@@ -13,7 +13,7 @@ warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 
 def write_evaluation(file_name, modelname, title, metric_labels, values):
-    write_dir = '../evaluation_results/' + modelname + '/'
+    write_dir = '../evaluation/evaluation_results/' + modelname + '/'
     if not os.path.exists(write_dir):
         os.makedirs(write_dir)
 
@@ -23,9 +23,18 @@ def write_evaluation(file_name, modelname, title, metric_labels, values):
         for metric, value in zip(metric_labels, values):
             f.write(metric + ": " + str(value) + "\n")
 
+def write_td_evaluation(file_name, modelname, title, value):
+    write_dir = '../evaluation/evaluation_results/' + modelname + '/'
+
+    if not os.path.exists(write_dir):
+        os.makedirs(write_dir)
+
+    with open(write_dir + file_name, 'w') as f:
+        f.write(title + "\n\n")
+        f.write("ATD: " + str(value) + "\n")
 
 def write_val_to_train_comparrison(file_name, title, dictionary, lowestTD):
-    write_dir = '../evaluation_results/'
+    write_dir = '../evaluation/evaluation_results/'
     if not os.path.exists(write_dir):
         os.makedirs(write_dir)
 

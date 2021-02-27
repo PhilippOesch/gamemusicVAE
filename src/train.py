@@ -63,11 +63,14 @@ else:
 def make_rand_songs(write_dir, thresh=0.25, song_num= 10):
     songs= decoder.predict(np.random.normal(0,1, size=(song_num, VAEparams["param_size"])))
 
+    results= []
     for i in range(song_num):
         song= songs[i].squeeze()
+        results.append(song)
+        print(song.shape)
         midi.samples_to_midi(song, write_dir +
                              'rand' + str(i) + '.mid', 16, thresh)
-    return np.array(songs)
+    return np.array(results)
 
 def print_distribution(write_dir):
     x_enc = np.squeeze(encoder.predict(musicVAE.data.y_orig)[2])
@@ -213,7 +216,8 @@ elif GeneralParams["createTestingValues"]:
     if not os.path.exists(write_dir):
         os.makedirs(write_dir)
     # testresults= make_rand_songs_normalized(write_dir + '/', rand_vecs, 0.25, True)
-    testresults= make_rand_songs_centered(write_dir, thresh=0.25, song_num= GeneralParams["num_rand_songs"])
+    # testresults= make_rand_songs_centered(write_dir, thresh=0.25, song_num= GeneralParams["num_rand_songs"])
+    testresults= make_rand_songs(write_dir, thresh=GeneralParams["thresh"], song_num= GeneralParams["num_rand_songs"])
 
     np.save('../evaluation/evaluation_sets/battle_theme/'+ GeneralParams["model_name"] +'_samples.npy', testresults)
 else:

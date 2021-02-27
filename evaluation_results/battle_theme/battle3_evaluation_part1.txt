@@ -1,7 +1,0 @@
-Train_Results Evaluation
-
-Empty Bars: 0.00625
-Drum Pattern: 0.9401944076248185
-Polyphonicity: 0.6757242757242757
-Average amount of different pitch classes: 7.5025
-average Song Note count: 633.72

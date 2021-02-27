@@ -1,0 +1,14 @@
+Comparrison of train_set of both models
+
+overworld to battle, i: 0: 0.3069270039641846
+overworld to battle, i: 1: 0.3030612104711646
+overworld to battle, i: 2: 0.3151406525225475
+overworld to battle, i: 3: 0.35922860963778114
+overworld to battle, i: 4: 0.2923733934934894
+battle to overworld, i: 0: 0.30788695926743553
+battle to overworld, i: 1: 0.2674494542963347
+battle to overworld, i: 2: 0.3246781149718125
+battle to overworld, i: 3: 0.30801029357553245
+battle to overworld, i: 4: 0.34405163958392715
+Avarage Tonal Distance: 0.31288073317842097
+Lowest Tonal Distance between 2 Songs: 0.07375408212343852

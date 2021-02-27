@@ -1,0 +1,9 @@
+Comparrison of train_set and generated samples of overworld_theme
+
+i: 0: 0.3132185059733392
+i: 1: 0.30335100866045756
+i: 2: 0.28634424225399
+i: 3: 0.3170414615732017
+i: 4: 0.30207641823972947
+Avarage Tonal Distance: 0.3044063273401436
+Lowest Tonal Distance between 2 Songs: 0.03710999836524328
