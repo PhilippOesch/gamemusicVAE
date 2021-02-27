@@ -1,0 +1,3 @@
+Battle Sample Set Evaluation:
+
+ATD: (0.26626439664660556, 0.029296875)
