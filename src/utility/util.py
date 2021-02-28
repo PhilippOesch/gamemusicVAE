@@ -72,3 +72,18 @@ def samples_to_pics(dir, samples, thresh=None):
         sample_to_pic(dir + '/s' + str(i) + '.png', samples[i], thresh)
 
 
+def song_to_pic(fname, samples, thresh=0.25):
+    inverted = np.where(samples > thresh, 0, 1)
+    break_points = int(inverted.shape[0]/4)
+    row1 = inverted[:break_points]
+    row2 = inverted[break_points:(break_points*2)]
+    row3 = inverted[(break_points*2):(break_points*3)]
+    row4 = inverted[(break_points*3):(inverted.shape[0])]
+    array = [row1, row2, row3, row4]
+
+    bordersize = 2
+
+    img = cv2.hconcat([cv2.vconcat(
+        val) for val in array])
+
+    cv2.imwrite('../model/song_pics/' + fname + '.png', img * 255)

@@ -17,22 +17,6 @@ VAEparams = {
     "dim3": 2048,
 }
 
-# convVAEparams = {
-#     "optimizer": Adam,
-#     "param_size": 512,
-#     "activation_str": 'relu',
-#     "max_length": 16,
-#     "bn_m": 0.9,
-#     "do_rate": 0.1,
-#     "lr": 0.0005,
-#     "epochs": 2000,
-#     "batch_size": 150,
-#     "use_batchnorm": True,
-#     "ignore_encoder_layer2": False,
-#     "dim1": 128,
-#     "dim2": 2048,
-# }
-
 GeneralParams= {
     "vae_b2": 10,
     "model_name": "overworld_final_1",
