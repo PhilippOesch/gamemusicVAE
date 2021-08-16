@@ -1,3 +1,5 @@
+/__pycache__
+/.vscode
 /samples.npy
 /lengths.npy
 /History
